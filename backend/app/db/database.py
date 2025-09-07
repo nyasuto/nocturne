@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
-from app.core.config import settings
 
+from app.core.config import settings
 
 # SQLite用の設定
 if settings.DATABASE_URL.startswith("sqlite"):
@@ -34,7 +34,6 @@ def get_db():
 
 def init_db():
     """データベース初期化"""
-    from app.models import journey, segment, audio  # 循環インポート回避
 
     Base.metadata.create_all(bind=engine)
     print("Database tables created successfully!")

@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import List
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
     @property
-    def cors_origins(self) -> List[str]:
+    def cors_origins(self) -> list[str]:
         """CORS設定をリストとして取得"""
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
 
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     )
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """シングルトンパターンで設定を取得"""
     return Settings()

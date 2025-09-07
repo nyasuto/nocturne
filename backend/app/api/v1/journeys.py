@@ -1,24 +1,24 @@
-from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+
 from app.db.database import get_db
 from app.models import Journey, Segment
 from app.schemas.journey import (
     JourneyCreate,
-    JourneyUpdate,
-    JourneyResponse,
     JourneyListResponse,
+    JourneyResponse,
+    JourneyUpdate,
 )
 from app.schemas.segment import SegmentCreate
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[JourneyListResponse])
+@router.get("/", response_model=list[JourneyListResponse])
 async def get_journeys(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    category: Optional[str] = None,
+    category: str | None = None,
     db: Session = Depends(get_db),
 ):
     """ジャーニー一覧を取得"""
@@ -91,7 +91,7 @@ async def delete_journey(journey_id: int, db: Session = Depends(get_db)):
 
 @router.post("/{journey_id}/segments", response_model=JourneyResponse, status_code=201)
 async def add_segments(
-    journey_id: int, segments: List[SegmentCreate], db: Session = Depends(get_db)
+    journey_id: int, segments: list[SegmentCreate], db: Session = Depends(get_db)
 ):
     """ジャーニーにセグメントを追加"""
     journey = db.query(Journey).filter(Journey.id == journey_id).first()
@@ -110,7 +110,7 @@ async def add_segments(
     return journey
 
 
-@router.get("/featured", response_model=List[JourneyListResponse])
+@router.get("/featured", response_model=list[JourneyListResponse])
 async def get_featured_journeys(db: Session = Depends(get_db)):
     """おすすめジャーニーを取得"""
     # 評価が高い順に取得
@@ -118,7 +118,7 @@ async def get_featured_journeys(db: Session = Depends(get_db)):
     return journeys
 
 
-@router.get("/categories", response_model=List[str])
+@router.get("/categories", response_model=list[str])
 async def get_categories(db: Session = Depends(get_db)):
     """利用可能なカテゴリ一覧を取得"""
     categories = (

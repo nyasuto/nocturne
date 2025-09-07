@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import List, Optional
+
 from pydantic import BaseModel, Field
+
 from app.schemas.segment import SegmentResponse
 
 
@@ -8,10 +9,10 @@ class JourneyBase(BaseModel):
     """ジャーニー基本スキーマ"""
 
     title: str = Field(..., max_length=200)
-    description: Optional[str] = None
+    description: str | None = None
     duration_sec: int = Field(..., gt=0)
-    thumbnail_url: Optional[str] = None
-    category: Optional[str] = None
+    thumbnail_url: str | None = None
+    category: str | None = None
 
 
 class JourneyCreate(JourneyBase):
@@ -23,10 +24,10 @@ class JourneyCreate(JourneyBase):
 class JourneyUpdate(BaseModel):
     """ジャーニー更新用スキーマ"""
 
-    title: Optional[str] = None
-    description: Optional[str] = None
-    thumbnail_url: Optional[str] = None
-    category: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
+    thumbnail_url: str | None = None
+    category: str | None = None
 
 
 class JourneyResponse(JourneyBase):
@@ -37,7 +38,7 @@ class JourneyResponse(JourneyBase):
     updated_at: datetime
     play_count: int
     rating: float
-    segments: List[SegmentResponse] = []
+    segments: list[SegmentResponse] = []
 
     class Config:
         from_attributes = True
@@ -48,10 +49,10 @@ class JourneyListResponse(BaseModel):
 
     id: int
     title: str
-    description: Optional[str]
+    description: str | None
     duration_sec: int
-    thumbnail_url: Optional[str]
-    category: Optional[str]
+    thumbnail_url: str | None
+    category: str | None
     play_count: int
     rating: float
 

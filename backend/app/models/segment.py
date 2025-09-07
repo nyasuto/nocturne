@@ -1,7 +1,10 @@
-from sqlalchemy import Column, Integer, String, Float, JSON, ForeignKey, Enum as SQLEnum
-from sqlalchemy.orm import relationship
-from app.db.database import Base
 import enum
+
+from sqlalchemy import JSON, Column, Float, ForeignKey, Integer
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy.orm import relationship
+
+from app.db.database import Base
 
 
 class SegmentType(str, enum.Enum):

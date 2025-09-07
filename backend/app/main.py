@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.core.config import settings
-from app.api.v1 import journeys, audio
-from app.db.database import init_db
 
+from app.api.v1 import audio, journeys
+from app.core.config import settings
+from app.db.database import init_db
 
 # FastAPIアプリケーションの作成
 app = FastAPI(
@@ -52,12 +52,12 @@ app.include_router(audio.router, prefix=f"{settings.API_PREFIX}/audio", tags=["a
 
 # エラーハンドラー
 @app.exception_handler(404)
-async def not_found_handler(request, exc):
+async def not_found_handler(_request, _exc):
     return JSONResponse(status_code=404, content={"detail": "Resource not found"})
 
 
 @app.exception_handler(500)
-async def internal_error_handler(request, exc):
+async def internal_error_handler(_request, _exc):
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
