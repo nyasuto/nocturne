@@ -87,38 +87,34 @@ nocturne/
     └── API.md                 # API仕様書
 ```
 
-## 🔧 開発環境セットアップ
+## 🚀 クイックスタート
 
-### 必要な環境
-- Python 3.11 以上
-- Node.js 20.x 以上
-- npm または yarn
-- Git
+### 🌟 **PoC実行可能** - [詳細ガイド](POC_GUIDE.md)
 
-### インストール手順
+現在のMVPで以下の機能が動作中:
+- ✅ Web Audio APIベースの音源制御
+- ✅ 睡眠ジャーニープレイヤー (タイマー付き)
+- ✅ 3つのサンプルジャーニー + セグメント制御
+- ✅ レスポンシブダークテーマUI
+
+### セットアップ (5分で完了)
 
 ```bash
-# リポジトリのクローン
-git clone https://github.com/[your-username]/nocturne.git
+# 1. リポジトリクローン
+git clone https://github.com/nyasuto/nocturne.git
 cd nocturne
 
-# バックエンドのセットアップ
-cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+# 2. バックエンド起動
+cd backend && source venv/bin/activate && python init_db.py
+uvicorn app.main:app --reload --port 8000 &
 
-# データベースの初期化
-python -m app.database init
+# 3. フロントエンド起動  
+cd ../frontend && npm install && npm run dev
 
-# フロントエンドのセットアップ
-cd ../frontend
-npm install
-
-# 環境変数の設定
-cp .env.example .env.local
-# .env.localを編集して必要な値を設定
+# 4. ブラウザで http://localhost:3000 を開く
 ```
+
+**即座に動作確認可能です！** 🎵
 
 ### 開発サーバーの起動
 
@@ -185,13 +181,14 @@ python scripts/register_audio.py --file ocean-waves.mp3 --category nature
 
 ## 🚦 開発フロー
 
-### フェーズ1: MVP (2週間)
+### フェーズ1: MVP ✅ **完了**
 - [x] プロジェクト構造のセットアップ
-- [ ] 基本的なUIの実装
-- [ ] 音源プレイヤーの実装
-- [ ] 3つの睡眠ジャーニーストーリー
-- [ ] タイマー機能
-- [ ] PWA対応
+- [x] 基本的なUIの実装 (Next.js 14 + Tailwind)
+- [x] 音源プレイヤーの実装 (Web Audio API)
+- [x] 3つの睡眠ジャーニーストーリー
+- [x] タイマー機能 (10-60分カスタマイズ)
+- [x] レスポンシブダークテーマ
+- [ ] PWA対応 ← **次のタスク**
 
 ### フェーズ2: パーソナライゼーション (1ヶ月)
 - [ ] ユーザー登録・ログイン
