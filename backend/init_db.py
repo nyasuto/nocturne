@@ -45,7 +45,7 @@ def create_sample_data():
                 order=1,
                 type=SegmentType.SFX,
                 content={
-                    "audio_url": "forest_ambience.mp3",
+                    "audio_url": "forest.mp3",
                     "gain": 0.3,
                     "loop": True
                 },
@@ -57,7 +57,7 @@ def create_sample_data():
                 order=2,
                 type=SegmentType.SFX,
                 content={
-                    "audio_url": "river_stream.mp3",
+                    "audio_url": "ocean.mp3",
                     "gain": 0.4,
                     "loop": True
                 },
@@ -69,7 +69,7 @@ def create_sample_data():
                 order=3,
                 type=SegmentType.MUSIC,
                 content={
-                    "audio_url": "peaceful_piano.mp3",
+                    "audio_url": "rain.mp3",
                     "gain": 0.2,
                     "loop": True
                 },
@@ -87,6 +87,34 @@ def create_sample_data():
             rating=4.7
         )
         db.add(journey2)
+        db.commit()
+        
+        # セグメント追加（ジャーニー2）
+        segments2 = [
+            Segment(
+                journey_id=journey2.id,
+                time_sec=0,
+                order=0,
+                type=SegmentType.NARRATION,
+                content={
+                    "text": "穏やかな海辺で、波の音を聞きながらリラックスしましょう。"
+                },
+                duration_sec=10
+            ),
+            Segment(
+                journey_id=journey2.id,
+                time_sec=10,
+                order=1,
+                type=SegmentType.SFX,
+                content={
+                    "audio_url": "ocean.mp3",
+                    "gain": 0.5,
+                    "loop": True
+                },
+                fade_in_sec=5.0
+            )
+        ]
+        db.add_all(segments2)
         
         # サンプルジャーニー3: 星空の瞑想
         journey3 = Journey(
@@ -97,6 +125,34 @@ def create_sample_data():
             rating=4.9
         )
         db.add(journey3)
+        db.commit()
+        
+        # セグメント追加（ジャーニー3）
+        segments3 = [
+            Segment(
+                journey_id=journey3.id,
+                time_sec=0,
+                order=0,
+                type=SegmentType.NARRATION,
+                content={
+                    "text": "星空を見上げながら、宇宙の静寂に身を委ねましょう。"
+                },
+                duration_sec=10
+            ),
+            Segment(
+                journey_id=journey3.id,
+                time_sec=10,
+                order=1,
+                type=SegmentType.MUSIC,
+                content={
+                    "audio_url": "silence.mp3",
+                    "gain": 0.1,
+                    "loop": True
+                },
+                fade_in_sec=10.0
+            )
+        ]
+        db.add_all(segments3)
         
         # サンプル音源データ
         audio_samples = [

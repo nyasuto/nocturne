@@ -1,14 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { api, Journey } from '@/lib/api';
+import { Play, Clock, Star } from 'lucide-react';
+import { api, Journey, JourneyDetail } from '@/lib/api';
 import { formatTime } from '@/lib/utils';
+import { JourneyPlayer } from '@/components/JourneyPlayer';
 
 export default function Home() {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [featuredJourneys, setFeaturedJourneys] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedJourney, setSelectedJourney] = useState<JourneyDetail | null>(null);
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [loadingJourney, setLoadingJourney] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -30,6 +35,30 @@ export default function Home() {
 
     loadData();
   }, []);
+
+  const handlePlayJourney = async (journey: Journey) => {
+    try {
+      setLoadingJourney(true);
+      const journeyDetail = await api.getJourney(journey.id);
+      setSelectedJourney(journeyDetail);
+      setShowPlayer(true);
+    } catch (err) {
+      console.error('Failed to load journey details:', err);
+      setError('ジャーニーの詳細情報の読み込みに失敗しました');
+    } finally {
+      setLoadingJourney(false);
+    }
+  };
+
+  const handlePlayerComplete = () => {
+    setShowPlayer(false);
+    setSelectedJourney(null);
+  };
+
+  const handlePlayerClose = () => {
+    setShowPlayer(false);
+    setSelectedJourney(null);
+  };
 
   if (loading) {
     return (
@@ -86,7 +115,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {featuredJourneys.map((journey) => (
-            <JourneyCard key={journey.id} journey={journey} />
+            <JourneyCard key={journey.id} journey={journey} onPlay={handlePlayJourney} loading={loadingJourney} />
           ))}
         </div>
       </section>
@@ -96,17 +125,34 @@ export default function Home() {
         <h2 className="text-2xl font-bold">睡眠ジャーニー</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {journeys.map((journey) => (
-            <JourneyCard key={journey.id} journey={journey} />
+            <JourneyCard key={journey.id} journey={journey} onPlay={handlePlayJourney} loading={loadingJourney} />
           ))}
         </div>
       </section>
+
+      {/* Player Modal */}
+      {showPlayer && selectedJourney && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md">
+            <JourneyPlayer
+              journey={selectedJourney}
+              onComplete={handlePlayerComplete}
+              onClose={handlePlayerClose}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function JourneyCard({ journey }: { journey: Journey }) {
+function JourneyCard({ journey, onPlay, loading }: { 
+  journey: Journey; 
+  onPlay: (journey: Journey) => void;
+  loading?: boolean;
+}) {
   return (
-    <div className="bg-card border border-border rounded-lg p-6 hover:border-accent/50 transition-colors cursor-pointer group">
+    <div className="bg-card border border-border rounded-lg p-6 hover:border-accent/50 transition-colors group">
       <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -114,7 +160,7 @@ function JourneyCard({ journey }: { journey: Journey }) {
               {journey.category || 'その他'}
             </span>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <span>⭐</span>
+              <Star className="w-4 h-4 text-yellow-500" />
               <span>{journey.rating}</span>
             </div>
           </div>
@@ -127,8 +173,32 @@ function JourneyCard({ journey }: { journey: Journey }) {
         </div>
         
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{formatTime(journey.duration_sec)}</span>
+          <div className="flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            <span>{formatTime(journey.duration_sec)}</span>
+          </div>
           <span>{journey.play_count}回再生</span>
+        </div>
+
+        {/* プレイボタン */}
+        <div className="pt-2">
+          <button
+            onClick={() => onPlay(journey)}
+            disabled={loading}
+            className="w-full bg-nocturne-dream hover:bg-nocturne-dream/80 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors group-hover:shadow-lg"
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>読み込み中...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                <span>プレイ</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>
