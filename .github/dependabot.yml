@@ -23,7 +23,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
-      day: 1
+      interval: "weekly"
+      day: "monday"
       time: "09:00"
       timezone: "Asia/Tokyo"
