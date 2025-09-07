@@ -30,8 +30,8 @@ setup: install-deps init-db ## 🔧 Complete development environment setup
 	@echo "Run 'make poc' to start PoC servers"
 
 install-deps: ## 📦 Install all dependencies (backend + frontend)
-	@echo "📦 Installing backend dependencies..."
-	cd backend && python -m pip install -r requirements.txt
+	@echo "📦 Installing backend dependencies with uv..."
+	cd backend && uv pip install -e .
 	@echo "📦 Installing frontend dependencies..."
 	cd frontend && npm install
 	@echo "✅ Dependencies installed"
@@ -48,7 +48,7 @@ dev: ## 🚀 Start both development servers (backend + frontend)
 
 dev-backend: ## 🐍 Start backend development server
 	@echo "🐍 Starting FastAPI backend server..."
-	cd backend && source venv/bin/activate && uvicorn app.main:app --reload --port 8000
+	cd backend && source .venv/bin/activate && uvicorn app.main:app --reload --port 8000
 
 dev-frontend: ## ⚛️ Start frontend development server  
 	@echo "⚛️ Starting Next.js frontend server..."
@@ -61,10 +61,12 @@ quality: ## 🧹 Run all quality checks (linting, formatting, type checking)
 	@$(MAKE) quality-frontend
 	@echo "✅ All quality checks passed!"
 
-quality-backend: ## 🐍 Backend quality checks (black, mypy)
+quality-backend: ## 🐍 Backend quality checks (ruff, mypy)
 	@echo "🐍 Checking backend code quality..."
-	cd backend && source venv/bin/activate && python -m black . --check
-	@echo "✅ Backend formatting OK"
+	cd backend && source .venv/bin/activate && ruff check app/
+	cd backend && source .venv/bin/activate && ruff format app/ --check
+	cd backend && source .venv/bin/activate && mypy app/
+	@echo "✅ Backend quality checks passed"
 
 quality-frontend: ## ⚛️ Frontend quality checks (eslint, typescript)
 	@echo "⚛️ Checking frontend code quality..."
@@ -75,7 +77,8 @@ quality-frontend: ## ⚛️ Frontend quality checks (eslint, typescript)
 # Formatting
 format: ## 🎨 Auto-format all code
 	@echo "🎨 Auto-formatting code..."
-	cd backend && source venv/bin/activate && python -m black .
+	cd backend && source .venv/bin/activate && ruff format app/
+	cd backend && source .venv/bin/activate && ruff check app/ --fix
 	cd frontend && npm run lint -- --fix 2>/dev/null || true
 	@echo "✅ Code formatted"
 
@@ -88,7 +91,7 @@ test: ## 🧪 Run all tests
 
 test-backend: ## 🐍 Run backend tests
 	@echo "🐍 Running backend tests..."
-	cd backend && source venv/bin/activate && python -m pytest tests/ -v 2>/dev/null || echo "⚠️ Backend tests not configured yet"
+	cd backend && source .venv/bin/activate && python -m pytest tests/ -v 2>/dev/null || echo "⚠️ Backend tests not configured yet"
 
 test-frontend: ## ⚛️ Run frontend tests  
 	@echo "⚛️ Running frontend tests..."

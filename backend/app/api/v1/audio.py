@@ -1,9 +1,10 @@
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, File, UploadFile
+import os
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from pathlib import Path
-import os
+
 from app.db.database import get_db
 from app.models import Audio, AudioCategory
 
@@ -14,9 +15,9 @@ AUDIO_DIR = Path("static/audio")
 AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
 
-@router.get("/", response_model=List[dict])
+@router.get("/", response_model=list[dict])
 async def get_audio_files(
-    category: Optional[AudioCategory] = None,
+    category: AudioCategory | None = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -63,7 +64,7 @@ async def upload_audio(
     file: UploadFile = File(...),
     display_name: str = Query(...),
     category: AudioCategory = Query(...),
-    tags: Optional[str] = Query(None),
+    tags: str | None = Query(None),
     db: Session = Depends(get_db),
 ):
     """音源ファイルをアップロード"""

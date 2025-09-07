@@ -1,7 +1,10 @@
-from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, Enum as SQLEnum
-from app.db.database import Base
 import enum
+from datetime import datetime
+
+from sqlalchemy import JSON, Column, DateTime, Float, Integer, String
+from sqlalchemy import Enum as SQLEnum
+
+from app.db.database import Base
 
 
 class AudioCategory(str, enum.Enum):
