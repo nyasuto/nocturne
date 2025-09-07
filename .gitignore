@@ -91,3 +91,8 @@ coverage.xml
 /frontend/public/audio/*.ogg
 /frontend/public/audio/*.m4a
 /backend/static/audio/
+
+# Auto-generated Next.js files
+/frontend/src/app/fonts/
+/frontend/src/app/favicon.ico
+/frontend/README.md
