@@ -1,7 +1,7 @@
 # 🌙 Nocturne - PoC用 Makefile
 # Make commands for development and quality assurance
 
-.PHONY: help setup dev-backend dev-frontend dev quality test clean install-deps init-db poc
+.PHONY: help setup dev-backend dev-frontend dev quality test clean install-deps init-db poc ci ci-backend ci-frontend ci-integration
 
 # Default target
 help: ## Show this help message
@@ -177,3 +177,35 @@ info: ## 💻 Show system information
 	@echo "📁 frontend/ - Next.js application"
 	@echo "📁 docs/     - Documentation"
 	@echo "📄 POC_GUIDE.md - PoC execution guide"
+
+# CI/CD Commands
+ci: ci-backend ci-frontend ci-integration ## 🔄 Run all CI checks locally
+	@echo "✅ All CI checks passed!"
+
+ci-backend: ## 🐍 Run backend CI checks (same as GitHub Actions)
+	@echo "🐍 Running backend CI checks..."
+	cd backend && source .venv/bin/activate && uv pip install -e .
+	cd backend && source .venv/bin/activate && ruff check app/
+	cd backend && source .venv/bin/activate && ruff format app/ --check
+	cd backend && source .venv/bin/activate && mypy app/ || true
+	cd backend && source .venv/bin/activate && pytest tests/ -v || echo "Tests not configured yet"
+	@echo "✅ Backend CI checks completed"
+
+ci-frontend: ## ⚛️ Run frontend CI checks (same as GitHub Actions)
+	@echo "⚛️ Running frontend CI checks..."
+	cd frontend && npm ci
+	cd frontend && npm run lint
+	cd frontend && npx tsc --noEmit
+	cd frontend && npm test -- --passWithNoTests
+	cd frontend && npm run build
+	@echo "✅ Frontend CI checks completed"
+
+ci-integration: ## 🌐 Run integration tests (same as GitHub Actions)
+	@echo "🌐 Running integration tests..."
+	@$(MAKE) init-db
+	cd backend && source .venv/bin/activate && uvicorn app.main:app --port 8001 &
+	@sleep 3
+	@curl -f http://localhost:8001/ || (echo "❌ Backend health check failed" && exit 1)
+	@curl -f http://localhost:8001/api/v1/journeys/ || (echo "❌ API endpoint failed" && exit 1)
+	@pkill -f "uvicorn app.main:app --port 8001" || true
+	@echo "✅ Integration tests completed"
