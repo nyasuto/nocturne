@@ -27,7 +27,7 @@ jobs:
       run: |
         uv venv .venv
         uv pip install -e .
-        uv pip install pytest-cov
+        uv pip install pytest-cov ruff mypy
     
     - name: Run tests with coverage
       working-directory: ./backend
