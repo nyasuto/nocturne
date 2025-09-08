@@ -113,6 +113,11 @@ export const login = async (email: string, password: string): Promise<User> => {
     throw new Error('ユーザーが見つかりません');
   }
 
+  // パスワードチェック（実際のアプリではハッシュ化されたパスワードと比較）
+  if (password.length < 6) {
+    throw new Error('パスワードが無効です');
+  }
+
   localStorage.setItem(AUTH_KEY, 'true');
   return existingUser;
 };
