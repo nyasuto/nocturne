@@ -1,7 +1,17 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, UserStats, getCurrentUser, getUserStats, recordSession } from '@/lib/auth';
+import { 
+  User, 
+  UserStats, 
+  getCurrentUser, 
+  getUserStats, 
+  recordSession,
+  login as authLogin,
+  register as authRegister,
+  logout as authLogout,
+  updateUser as authUpdateUser
+} from '@/lib/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -46,7 +56,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { login: authLogin } = await import('@/lib/auth');
     const user = await authLogin(email, password);
     setUser(user);
     
@@ -55,7 +64,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const register = async (email: string, password: string, name: string) => {
-    const { register: authRegister } = await import('@/lib/auth');
     const user = await authRegister(email, password, name);
     setUser(user);
     
@@ -64,7 +72,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = () => {
-    const { logout: authLogout } = await import('@/lib/auth');
     authLogout();
     setUser(null);
     setStats(null);
@@ -73,7 +80,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const updateUser = (updates: Partial<Omit<User, 'id' | 'createdAt'>>) => {
     if (!user) return;
     
-    const { updateUser: authUpdateUser } = await import('@/lib/auth');
     const updatedUser = authUpdateUser(updates);
     if (updatedUser) {
       setUser(updatedUser);
