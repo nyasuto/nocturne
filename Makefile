@@ -1,7 +1,7 @@
 # 🌙 Nocturne - PoC用 Makefile
 # Make commands for development and quality assurance
 
-.PHONY: help setup dev-backend dev-frontend dev quality test clean install-deps init-db poc ci ci-backend ci-frontend ci-integration
+.PHONY: help setup dev-backend dev-frontend dev quality test clean install-deps init-db poc ci ci-backend ci-frontend ci-integration stop restart
 
 # Default target
 help: ## Show this help message
@@ -112,6 +112,20 @@ reset-db: ## 🔄 Reset database (delete and reinitialize)
 	rm -f backend/database.db
 	@$(MAKE) init-db
 	@echo "✅ Database reset complete"
+
+# Server Management
+stop: ## 🛑 Stop all running servers (kill processes on ports 3000 and 8000)
+	@echo "🛑 Stopping servers..."
+	@echo "Checking port 8000 (backend)..."
+	@lsof -ti:8000 | xargs kill -9 2>/dev/null || echo "✓ Port 8000 is free"
+	@echo "Checking port 8001 (CI backend)..."
+	@lsof -ti:8001 | xargs kill -9 2>/dev/null || echo "✓ Port 8001 is free"
+	@echo "Checking port 3000 (frontend)..."
+	@lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "✓ Port 3000 is free"
+	@echo "✅ All servers stopped"
+
+restart: stop dev ## 🔄 Restart all development servers
+	@echo "✅ Servers restarted"
 
 # Cleanup
 clean: ## 🧹 Clean build artifacts and temp files
