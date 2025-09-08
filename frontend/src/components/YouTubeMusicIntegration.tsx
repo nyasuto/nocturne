@@ -28,7 +28,7 @@ export function YouTubeMusicIntegration() {
 
   useEffect(() => {
     checkConnectionStatus();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkConnectionStatus = async () => {
     try {
@@ -115,6 +115,8 @@ export function YouTubeMusicIntegration() {
     }
   };
 
+  // TODO: Phase2で使用予定 - プレイリスト作成ダイアログ実装時に利用
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const createSleepPlaylist = async (trackIds: string[], title: string) => {
     try {
       const playlist = await youtubeMusicService.createSleepPlaylist({
@@ -221,6 +223,7 @@ export function YouTubeMusicIntegration() {
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
                         {playlist.thumbnail_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img 
                             src={playlist.thumbnail_url} 
                             alt={playlist.title}
@@ -257,6 +260,7 @@ export function YouTubeMusicIntegration() {
                   {tracks.slice(0, 10).map((track) => (
                     <div key={track.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50">
                       {track.thumbnail_url && (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img 
                           src={track.thumbnail_url} 
                           alt={track.title}
@@ -303,7 +307,10 @@ export function YouTubeMusicIntegration() {
                   <p className="text-muted-foreground">
                     まだ睡眠プレイリストがありません
                   </p>
-                  <Button className="mt-4" onClick={() => {}}>
+                  <Button className="mt-4" onClick={() => {
+                    // TODO: プレイリスト作成ダイアログを開く
+                    console.log('プレイリスト作成機能は次のPhaseで実装予定');
+                  }}>
                     プレイリストを作成
                   </Button>
                 </div>
@@ -380,6 +387,7 @@ export function YouTubeMusicIntegration() {
                   {searchResults.map((track) => (
                     <div key={track.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50">
                       {track.thumbnail_url && (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img 
                           src={track.thumbnail_url} 
                           alt={track.title}
