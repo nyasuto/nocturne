@@ -63,7 +63,10 @@ export interface SleepSession {
   ended_at?: string;
   duration_minutes?: number;
   sleep_quality_rating?: number;
+  message: string;
 }
+
+// 重複削除済み
 
 class YouTubeMusicService {
   private getAuthHeaders() {
@@ -78,7 +81,7 @@ class YouTubeMusicService {
     const response = await axios.get(`${API_BASE_URL}/api/v1/youtube-music/auth/url`, {
       headers: this.getAuthHeaders()
     });
-    return response.data.auth_url;
+    return (response.data as { auth_url: string }).auth_url;
   }
 
   async getConnectionStatus(): Promise<{
@@ -89,7 +92,7 @@ class YouTubeMusicService {
     const response = await axios.get(`${API_BASE_URL}/api/v1/youtube-music/status`, {
       headers: this.getAuthHeaders()
     });
-    return response.data;
+    return response.data as { connected: boolean; expires_at?: string; scopes?: string[] };
   }
 
   async disconnect(): Promise<void> {
@@ -102,7 +105,7 @@ class YouTubeMusicService {
     const response = await axios.get(`${API_BASE_URL}/api/v1/youtube-music/playlists`, {
       headers: this.getAuthHeaders()
     });
-    return response.data;
+    return response.data as YouTubePlaylist[];
   }
 
   async getPlaylistTracks(playlistId: string): Promise<YouTubeTrack[]> {
@@ -110,7 +113,7 @@ class YouTubeMusicService {
       `${API_BASE_URL}/api/v1/youtube-music/playlists/${playlistId}/tracks`,
       { headers: this.getAuthHeaders() }
     );
-    return response.data;
+    return response.data as YouTubeTrack[];
   }
 
   async searchTracks(query: string): Promise<YouTubeTrack[]> {
@@ -118,7 +121,7 @@ class YouTubeMusicService {
       params: { q: query },
       headers: this.getAuthHeaders()
     });
-    return response.data;
+    return response.data as YouTubeTrack[];
   }
 
   async getTrackDetails(videoId: string): Promise<YouTubeTrack> {
@@ -126,7 +129,7 @@ class YouTubeMusicService {
       `${API_BASE_URL}/api/v1/youtube-music/track/${videoId}`,
       { headers: this.getAuthHeaders() }
     );
-    return response.data;
+    return response.data as YouTubeTrack;
   }
 
   async createSleepPlaylist(request: CreatePlaylistRequest): Promise<SleepPlaylist> {
@@ -135,7 +138,7 @@ class YouTubeMusicService {
       request,
       { headers: this.getAuthHeaders() }
     );
-    return response.data;
+    return response.data as SleepPlaylist;
   }
 
   async getSleepPlaylists(): Promise<SleepPlaylist[]> {
@@ -143,7 +146,7 @@ class YouTubeMusicService {
       `${API_BASE_URL}/api/v1/youtube-music/playlists/sleep`,
       { headers: this.getAuthHeaders() }
     );
-    return response.data;
+    return response.data as SleepPlaylist[];
   }
 
   async startSleepSession(playlistId?: string): Promise<SleepSession> {
@@ -152,7 +155,7 @@ class YouTubeMusicService {
       { playlist_id: playlistId },
       { headers: this.getAuthHeaders() }
     );
-    return response.data;
+    return response.data as SleepSession;
   }
 
   async endSleepSession(
@@ -168,7 +171,7 @@ class YouTubeMusicService {
       feedback,
       { headers: this.getAuthHeaders() }
     );
-    return response.data;
+    return response.data as SleepSession;
   }
 
   // Helper methods for sleep analysis

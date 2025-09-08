@@ -4,26 +4,23 @@ import { useState, useEffect } from 'react';
 import { Music, Youtube, Play, Loader2, Search, Clock, Star, AlertTriangle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// TODO: 不足しているUIコンポーネントを追加
+// import { Input } from '@/components/ui/input';
+// import { Badge } from '@/components/ui/badge';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   youtubeMusicService, 
   YouTubePlaylist, 
-  YouTubeTrack, 
-  SleepPlaylist 
+  YouTubeTrack
+  // SleepPlaylist は Phase2で使用予定
 } from '@/services/youtubeMusicService';
 
 export function YouTubeMusicIntegration() {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [playlists, setPlaylists] = useState<YouTubePlaylist[]>([]);
-  const [sleepPlaylists, setSleepPlaylists] = useState<SleepPlaylist[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<YouTubePlaylist | null>(null);
   const [tracks, setTracks] = useState<YouTubeTrack[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<YouTubeTrack[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,7 +35,6 @@ export function YouTubeMusicIntegration() {
       
       if (status.connected) {
         await loadPlaylists();
-        await loadSleepPlaylists();
       }
     } catch (error) {
       console.error('Failed to check connection status:', error);
@@ -63,7 +59,6 @@ export function YouTubeMusicIntegration() {
       await youtubeMusicService.disconnect();
       setIsConnected(false);
       setPlaylists([]);
-      setSleepPlaylists([]);
     } catch (error) {
       console.error('Failed to disconnect:', error);
       setError('切断に失敗しました');
@@ -80,14 +75,7 @@ export function YouTubeMusicIntegration() {
     }
   };
 
-  const loadSleepPlaylists = async () => {
-    try {
-      const sleepLists = await youtubeMusicService.getSleepPlaylists();
-      setSleepPlaylists(sleepLists);
-    } catch (error) {
-      console.error('Failed to load sleep playlists:', error);
-    }
-  };
+  // TODO: Phase2で睡眠プレイリスト機能を実装
 
   const loadPlaylistTracks = async (playlist: YouTubePlaylist) => {
     try {
@@ -100,39 +88,7 @@ export function YouTubeMusicIntegration() {
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    try {
-      setIsSearching(true);
-      const results = await youtubeMusicService.searchTracks(searchQuery);
-      setSearchResults(results);
-    } catch (error) {
-      console.error('Search failed:', error);
-      setError('検索に失敗しました');
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // TODO: Phase2で使用予定 - プレイリスト作成ダイアログ実装時に利用
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const createSleepPlaylist = async (trackIds: string[], title: string) => {
-    try {
-      const playlist = await youtubeMusicService.createSleepPlaylist({
-        title,
-        track_ids: trackIds,
-        sleep_goal: 'general',
-        sync_to_youtube: true
-      });
-      
-      await loadSleepPlaylists();
-      return playlist;
-    } catch (error) {
-      console.error('Failed to create playlist:', error);
-      setError('プレイリストの作成に失敗しました');
-    }
-  };
+  // TODO: Phase2で検索・プレイリスト作成機能を実装
 
   if (isLoading) {
     return (
@@ -183,10 +139,10 @@ export function YouTubeMusicIntegration() {
               YouTube Music
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Badge variant="success" className="flex items-center gap-1">
+              <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm flex items-center gap-1">
                 <Check className="w-3 h-3" />
                 接続済み
-              </Badge>
+              </span>
               <Button onClick={handleDisconnect} variant="outline" size="sm">
                 切断
               </Button>
@@ -195,16 +151,26 @@ export function YouTubeMusicIntegration() {
         </CardHeader>
       </Card>
 
-      {/* Main Content */}
-      <Tabs defaultValue="library" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="library">ライブラリ</TabsTrigger>
-          <TabsTrigger value="sleep">睡眠プレイリスト</TabsTrigger>
-          <TabsTrigger value="search">検索</TabsTrigger>
-        </TabsList>
+      {/* Main Content - 簡易実装 */}
+      <div className="w-full">
+        <div className="mb-4">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button className="border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600">
+                ライブラリ
+              </button>
+              <button className="border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                睡眠プレイリスト
+              </button>
+              <button className="border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                検索（準備中）
+              </button>
+            </nav>
+          </div>
+        </div>
 
-        {/* Library Tab */}
-        <TabsContent value="library" className="space-y-4">
+        {/* Library Content */}
+        <div className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>あなたのプレイリスト</CardTitle>
@@ -290,125 +256,15 @@ export function YouTubeMusicIntegration() {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
+        </div>
 
-        {/* Sleep Playlists Tab */}
-        <TabsContent value="sleep" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>睡眠プレイリスト</CardTitle>
-              <CardDescription>
-                Nocturneで作成した睡眠専用プレイリスト
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {sleepPlaylists.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    まだ睡眠プレイリストがありません
-                  </p>
-                  <Button className="mt-4" onClick={() => {
-                    // TODO: プレイリスト作成ダイアログを開く
-                    console.log('プレイリスト作成機能は次のPhaseで実装予定');
-                  }}>
-                    プレイリストを作成
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {sleepPlaylists.map((playlist) => (
-                    <Card key={playlist.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-semibold">{playlist.title}</h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {playlist.description}
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Music className="w-3 h-3" />
-                                {playlist.track_count} 曲
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {youtubeMusicService.formatDuration(playlist.total_duration_seconds)}
-                              </span>
-                              {playlist.average_sleep_score && (
-                                <span className="flex items-center gap-1">
-                                  <Star className="w-3 h-3" />
-                                  スコア {playlist.average_sleep_score.toFixed(0)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <Button size="sm">
-                            <Play className="w-4 h-4 mr-1" />
-                            再生
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Search Tab */}
-        <TabsContent value="search" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>楽曲検索</CardTitle>
-              <CardDescription>
-                YouTube Musicから睡眠に適した楽曲を検索
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2 mb-4">
-                <Input
-                  placeholder="アーティスト名や曲名を入力..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                />
-                <Button onClick={handleSearch} disabled={isSearching}>
-                  {isSearching ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Search className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
-
-              {searchResults.length > 0 && (
-                <div className="space-y-3">
-                  {searchResults.map((track) => (
-                    <div key={track.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50">
-                      {track.thumbnail_url && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img 
-                          src={track.thumbnail_url} 
-                          alt={track.title}
-                          className="w-12 h-12 rounded"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{track.title}</p>
-                        <p className="text-xs text-muted-foreground">{track.artist}</p>
-                      </div>
-                      <Button size="sm" variant="outline">
-                        分析
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        {/* TODO: Phase2で睡眠プレイリストと検索機能を追加 */}
+        <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+          <p className="text-sm text-gray-600">
+            睡眠プレイリストと楽曲検索機能は次のPhaseで実装予定です
+          </p>
+        </div>
+      </div>
 
       {/* Error Message */}
       {error && (
