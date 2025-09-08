@@ -96,3 +96,6 @@ coverage.xml
 /frontend/src/app/fonts/
 /frontend/src/app/favicon.ico
 /frontend/README.md
+
+# Serena (MCP code assistant)
+.serena/
