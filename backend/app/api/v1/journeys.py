@@ -31,6 +31,14 @@ async def get_journeys(
     return journeys
 
 
+@router.get("/featured", response_model=list[JourneyListResponse])
+async def get_featured_journeys(db: Session = Depends(get_db)):
+    """おすすめジャーニーを取得"""
+    # 評価が高い順に取得
+    journeys = db.query(Journey).order_by(Journey.rating.desc()).limit(6).all()
+    return journeys
+
+
 @router.get("/{journey_id}", response_model=JourneyResponse)
 async def get_journey(journey_id: int, db: Session = Depends(get_db)):
     """特定のジャーニーを取得"""
@@ -108,14 +116,6 @@ async def add_segments(
     db.commit()
     db.refresh(journey)
     return journey
-
-
-@router.get("/featured", response_model=list[JourneyListResponse])
-async def get_featured_journeys(db: Session = Depends(get_db)):
-    """おすすめジャーニーを取得"""
-    # 評価が高い順に取得
-    journeys = db.query(Journey).order_by(Journey.rating.desc()).limit(6).all()
-    return journeys
 
 
 @router.get("/categories", response_model=list[str])
