@@ -16,6 +16,13 @@ def create_sample_data():
     db = SessionLocal()
 
     try:
+        # 既存のデータを全て削除（クリーンな状態から開始）
+        print("🗑️ Clearing existing data...")
+        db.query(Segment).delete()
+        db.query(Journey).delete() 
+        db.query(Audio).delete()
+        db.commit()
+        print("✅ Existing data cleared")
         # サンプルジャーニー1: 森と川のせせらぎ
         journey1 = Journey(
             title="森と川のせせらぎ",
