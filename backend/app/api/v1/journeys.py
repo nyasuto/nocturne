@@ -20,7 +20,7 @@ async def get_journeys(
     limit: int = Query(10, ge=1, le=100),
     category: str | None = None,
     db: Session = Depends(get_db),
-):
+) -> list[JourneyListResponse]:
     """ジャーニー一覧を取得"""
     query = db.query(Journey)
 

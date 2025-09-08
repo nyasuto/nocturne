@@ -7,6 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import { Card, CardContent } from '@/components/ui/card';
 import { getAudioEngine, AudioSegment } from '@/lib/audio';
 import type { JourneyDetail } from '@/lib/api';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface JourneyPlayerProps {
   journey: JourneyDetail;
@@ -17,12 +18,13 @@ interface JourneyPlayerProps {
 const TIMER_OPTIONS = [10, 20, 30, 45, 60]; // minutes
 
 export function JourneyPlayer({ journey, onComplete, onClose }: JourneyPlayerProps) {
+  const { settings } = useSettings();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [volume, setVolume] = useState(70);
+  const [volume, setVolume] = useState(settings.defaultVolume);
   const [currentTime, setCurrentTime] = useState(0);
-  const [selectedTimer, setSelectedTimer] = useState(30); // default 30 minutes
-  const [timeRemaining, setTimeRemaining] = useState(selectedTimer * 60);
+  const [selectedTimer, setSelectedTimer] = useState(settings.defaultTimer); // デフォルト値を設定から取得
+  const [timeRemaining, setTimeRemaining] = useState(settings.defaultTimer * 60);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export function JourneyPlayer({ journey, onComplete, onClose }: JourneyPlayerPro
     const audioSegment: AudioSegment = {
       id: segment.id,
       audio_file: segment.content.audio_url || 'silence.mp3',
-      volume: segment.content.gain || 0.7,
+      volume: segment.content.gain || 1.0,
       fade_in_sec: segment.fade_in_sec,
       fade_out_sec: segment.fade_out_sec,
       duration_sec: segment.duration_sec
@@ -113,6 +115,21 @@ export function JourneyPlayer({ journey, onComplete, onClose }: JourneyPlayerPro
   }, [currentSegmentIndex, isPlaying, isPaused, playCurrentSegment]);
 
   const handlePlay = async () => {
+    // AudioContext を即座に有効化（ブラウザのAutoplay Policy対応）
+    if (audioEngine.current.getState && audioEngine.current.getState().isPlaying === false) {
+      try {
+        await audioEngine.current.initialize();
+        // ユーザーインタラクション後にAudioContextを即座に再開
+        if (audioEngine.current.audioContext?.state === 'suspended') {
+          await audioEngine.current.audioContext.resume();
+        }
+      } catch (error) {
+        console.error('Failed to initialize audio for immediate playback:', error);
+        setError('音声の初期化に失敗しました。再度お試しください。');
+        return;
+      }
+    }
+
     if (isPaused) {
       // 再開
       setIsPaused(false);

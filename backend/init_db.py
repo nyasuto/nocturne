@@ -51,7 +51,7 @@ def create_sample_data():
                 time_sec=10,
                 order=1,
                 type=SegmentType.SFX,
-                content={"audio_url": "forest.mp3", "gain": 0.3, "loop": True},
+                content={"audio_url": "forest.mp3", "gain": 0.8, "loop": True},
                 fade_in_sec=3.0,
             ),
             Segment(
@@ -59,7 +59,7 @@ def create_sample_data():
                 time_sec=30,
                 order=2,
                 type=SegmentType.SFX,
-                content={"audio_url": "ocean.mp3", "gain": 0.4, "loop": True},
+                content={"audio_url": "ocean.mp3", "gain": 0.7, "loop": True},
                 fade_in_sec=5.0,
             ),
             Segment(
@@ -67,7 +67,7 @@ def create_sample_data():
                 time_sec=120,
                 order=3,
                 type=SegmentType.MUSIC,
-                content={"audio_url": "rain.mp3", "gain": 0.2, "loop": True},
+                content={"audio_url": "rain.mp3", "gain": 0.5, "loop": True},
                 fade_in_sec=10.0,
             ),
         ]
@@ -101,7 +101,7 @@ def create_sample_data():
                 time_sec=10,
                 order=1,
                 type=SegmentType.SFX,
-                content={"audio_url": "ocean.mp3", "gain": 0.5, "loop": True},
+                content={"audio_url": "ocean.mp3", "gain": 0.8, "loop": True},
                 fade_in_sec=5.0,
             ),
         ]
@@ -133,7 +133,7 @@ def create_sample_data():
                 time_sec=10,
                 order=1,
                 type=SegmentType.MUSIC,
-                content={"audio_url": "silence.mp3", "gain": 0.1, "loop": True},
+                content={"audio_url": "silence.mp3", "gain": 0.3, "loop": True},
                 fade_in_sec=10.0,
             ),
         ]

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="128" fill="#1e3a5f"/>
+  
+  <!-- 月のクレセント -->
+  <circle cx="256" cy="200" r="80" fill="#e2e8f0"/>
+  <circle cx="280" cy="185" r="65" fill="#1e3a5f"/>
+  
+  <!-- 星 -->
+  <circle cx="180" cy="140" r="6" fill="#e2e8f0"/>
+  <circle cx="350" cy="120" r="4" fill="#e2e8f0"/>
+  <circle cx="380" cy="160" r="5" fill="#e2e8f0"/>
+  <circle cx="200" cy="100" r="3" fill="#e2e8f0"/>
+  <circle cx="320" cy="80" r="4" fill="#e2e8f0"/>
+  
+  <!-- 音波 -->
+  <path d="M 120 320 Q 140 300 160 320 Q 180 340 200 320" stroke="#805ad5" stroke-width="3" fill="none"/>
+  <path d="M 120 350 Q 160 320 200 350 Q 240 380 280 350" stroke="#805ad5" stroke-width="3" fill="none"/>
+  <path d="M 120 380 Q 180 340 240 380 Q 300 420 360 380" stroke="#805ad5" stroke-width="3" fill="none"/>
+  
+  <!-- Nocturneテキスト -->
+  <text x="256" y="460" font-family="Arial, sans-serif" font-size="36" font-weight="bold" text-anchor="middle" fill="#e2e8f0">Nocturne</text>
+</svg>

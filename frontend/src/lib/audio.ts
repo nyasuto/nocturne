@@ -14,7 +14,7 @@ export interface AudioEngineOptions {
 }
 
 export class AudioEngine {
-  private audioContext: AudioContext | null = null;
+  public audioContext: AudioContext | null = null;
   private audioBuffers: Map<string, AudioBuffer> = new Map();
   private currentSource: AudioBufferSourceNode | null = null;
   private gainNode: GainNode | null = null;
@@ -30,7 +30,7 @@ export class AudioEngine {
 
   constructor(options: AudioEngineOptions = {}) {
     this.baseURL = options.baseURL || '/audio';
-    this.defaultVolume = options.defaultVolume || 0.7;
+    this.defaultVolume = options.defaultVolume || 1.0;
     this.fadeStepMs = options.fadeStepMs || 50;
   }
 
