@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { PWAInstall } from "@/components/PWAInstall";
+import { PWAProvider } from "@/components/PWAProvider";
+import { SettingsProvider } from "@/contexts/SettingsContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "Nocturne - 睡眠サポートアプリ",
@@ -35,11 +39,17 @@ export default function RootLayout({
   return (
     <html lang="ja" className="dark">
       <body className="min-h-screen bg-background font-sans antialiased">
-        <div className="relative flex min-h-screen flex-col">
-          <main className="flex-1">
-            {children}
-          </main>
-        </div>
+        <PWAProvider />
+        <AuthProvider>
+          <SettingsProvider>
+            <div className="relative flex min-h-screen flex-col">
+              <main className="flex-1">
+                {children}
+              </main>
+              <PWAInstall />
+            </div>
+          </SettingsProvider>
+        </AuthProvider>
       </body>
     </html>
   );

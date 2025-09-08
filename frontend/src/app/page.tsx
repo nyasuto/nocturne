@@ -1,12 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Play, Clock, Star } from 'lucide-react';
+import { Play, Clock, Star, Settings, User } from 'lucide-react';
 import { api, Journey, JourneyDetail } from '@/lib/api';
 import { formatTime } from '@/lib/utils';
 import { JourneyPlayer } from '@/components/JourneyPlayer';
+import { SettingsModal } from '@/components/SettingsModal';
+import { AuthModal } from '@/components/AuthModal';
+import { UserProfile } from '@/components/UserProfile';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
+  const { isAuthenticated, user } = useAuth();
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [featuredJourneys, setFeaturedJourneys] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,6 +19,9 @@ export default function Home() {
   const [selectedJourney, setSelectedJourney] = useState<JourneyDetail | null>(null);
   const [showPlayer, setShowPlayer] = useState(false);
   const [loadingJourney, setLoadingJourney] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -84,6 +92,34 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
+      {/* Top Controls */}
+      <div className="fixed top-4 right-4 z-40 flex gap-2">
+        {/* User/Auth Button */}
+        <button
+          onClick={() => isAuthenticated ? setShowProfile(true) : setShowAuth(true)}
+          className="bg-nocturne-deep hover:bg-nocturne-moon border border-nocturne-moon hover:border-nocturne-star text-nocturne-moon hover:text-nocturne-star p-3 rounded-full transition-colors shadow-lg"
+        >
+          <User className="w-5 h-5" />
+        </button>
+
+        {/* Settings Button */}
+        <button
+          onClick={() => setShowSettings(true)}
+          className="bg-nocturne-deep hover:bg-nocturne-moon border border-nocturne-moon hover:border-nocturne-star text-nocturne-moon hover:text-nocturne-star p-3 rounded-full transition-colors shadow-lg"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Welcome Message */}
+      {isAuthenticated && user && (
+        <div className="text-center py-4">
+          <p className="text-nocturne-star">
+            おかえりなさい、{user.name}さん 🌙
+          </p>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="text-center space-y-6 py-12">
         <div className="space-y-4">
@@ -142,6 +178,24 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Settings Modal */}
+      <SettingsModal 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+      />
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuth} 
+        onClose={() => setShowAuth(false)} 
+      />
+
+      {/* User Profile Modal */}
+      <UserProfile 
+        isOpen={showProfile} 
+        onClose={() => setShowProfile(false)} 
+      />
     </div>
   );
 }
