@@ -24,6 +24,7 @@ from app.schemas.ai_music import (
     MusicGenreEnum,
 )
 from app.services.audio_cache import audio_cache
+from app.services.mubert_service import mubert_service
 
 
 class ProgrammaticMusicGenerator:
@@ -185,6 +186,7 @@ class AIMusicGenerator:
     def __init__(self):
         """初期化"""
         self.programmatic_generator = ProgrammaticMusicGenerator()
+        self.mubert_service = mubert_service
 
         # ジャンル別生成パラメータ
         self.genre_configs = {
@@ -247,7 +249,15 @@ class AIMusicGenerator:
             if cached_track:
                 return MusicGenerationResponse(success=True, track=cached_track)
 
-            # 新規生成
+            # 新規生成: Mubert API優先、プログラマブル生成をフォールバック
+            mubert_response = await self._try_mubert_generation(request)
+            if mubert_response.success:
+                return mubert_response
+
+            # Mubert失敗時はプログラマブル生成にフォールバック
+            print(
+                f"Mubert生成失敗、プログラマブル生成にフォールバック: {mubert_response.error_message}"
+            )
             track = await self._generate_programmatic_music(request)
 
             return MusicGenerationResponse(success=True, track=track)
@@ -255,6 +265,26 @@ class AIMusicGenerator:
         except Exception as e:
             return MusicGenerationResponse(
                 success=False, error_message=f"音楽生成エラー: {str(e)}"
+            )
+
+    async def _try_mubert_generation(
+        self, request: MusicGenerationRequest
+    ) -> MusicGenerationResponse:
+        """Mubert APIで音楽生成を試行"""
+        try:
+            # Mubert APIが利用可能かチェック
+            if not mubert_service._is_available():
+                return MusicGenerationResponse(
+                    success=False, error_message="Mubert APIキーが設定されていません"
+                )
+
+            # Mubert API呼び出し
+            async with mubert_service:
+                return await mubert_service.generate_sleep_track(request)
+
+        except Exception as e:
+            return MusicGenerationResponse(
+                success=False, error_message=f"Mubert API呼び出しエラー: {str(e)}"
             )
 
     async def _generate_programmatic_music(
