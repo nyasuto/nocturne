@@ -292,7 +292,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </div>
             )}
 
-            {/* プライバシー設定 */}
+            {/* Privacy Settings */}
             {activeTab === 'privacy' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">

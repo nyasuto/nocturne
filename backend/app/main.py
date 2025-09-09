@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1 import audio, journeys
+from app.routers import ai_music
 from app.core.config import settings
 from app.db.database import init_db
 
@@ -48,6 +49,9 @@ app.include_router(
 )
 
 app.include_router(audio.router, prefix=f"{settings.API_PREFIX}/audio", tags=["audio"])
+
+# AI音楽生成ルーター
+app.include_router(ai_music.router)
 
 
 # エラーハンドラー

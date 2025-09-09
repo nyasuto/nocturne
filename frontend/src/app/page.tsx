@@ -6,7 +6,7 @@ import { TonightDashboard } from '@/components/TonightDashboard';
 import { SettingsModal } from '@/components/SettingsModal';
 import { AuthModal } from '@/components/AuthModal';
 import { UserProfile } from '@/components/UserProfile';
-import { YouTubeMusicIntegration } from '@/components/YouTubeMusicIntegration';
+import { AIMusicPlayer } from '@/components/AIMusicPlayer';
 import { useAuth } from '@/contexts/AuthContext';
 import { Settings, User } from 'lucide-react';
 
@@ -37,13 +37,13 @@ export default function Home() {
       case 'library':
         return (
           <div className="space-y-6">
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-bold mb-4">音楽ライブラリ</h2>
-              <p className="text-muted-foreground mb-6">
-                YouTube Musicと連携して、睡眠に最適な音楽を探索しましょう
+            <div className="text-center py-8">
+              <h2 className="text-2xl font-bold mb-4 text-nocturne-star">AI音楽生成</h2>
+              <p className="text-nocturne-moon mb-6">
+                AIが生成する睡眠に最適な音楽で、質の高い休息をサポートします
               </p>
-              <YouTubeMusicIntegration />
             </div>
+            <AIMusicPlayer />
           </div>
         );
       
