@@ -39,6 +39,31 @@ const convertYouTubePlaylistToPlaylist = (playlist: YouTubePlaylist): Playlist =
   track_count: playlist.track_count
 });
 
+// Reverse conversion helpers to work with original handlers
+const convertTrackToYouTubeTrack = (track: Track): YouTubeTrack => ({
+  id: track.id,
+  title: track.title,
+  artist: track.artist,
+  thumbnail_url: track.thumbnail_url || null,
+  youtube_url: track.youtube_url,
+  duration_seconds: track.duration_seconds,
+  sleep_analysis: {
+    sleep_score: track.sleep_score,
+    recommended_sleep_stages: [],
+    optimal_play_time: '22:00-23:00',
+    warnings: []
+  }
+});
+
+const convertPlaylistToYouTubePlaylist = (playlist: Playlist): YouTubePlaylist => ({
+  id: playlist.id,
+  title: playlist.title,
+  description: playlist.description || '',
+  thumbnail_url: playlist.thumbnail_url || null,
+  track_count: playlist.track_count,
+  privacy_status: 'private'
+});
+
 // Local type definitions to match the component needs
 interface Track {
   id: string;
@@ -294,21 +319,21 @@ export function YouTubeMusicIntegration() {
           <PlaylistShelf
             playlists={playlists.map(convertYouTubePlaylistToPlaylist)}
             isLoading={isLoading}
-            onPlaylistClick={(playlist: Playlist) => handlePlaylistClick(playlist as any)}
+            onPlaylistClick={(playlist: Playlist) => handlePlaylistClick(convertPlaylistToYouTubePlaylist(playlist))}
           />
           
           {/* Recommended for Sleep */}
           <RecommendedTracksShelf
             tracks={recommendedTracks.map(convertYouTubeTrackToTrack)}
             isLoading={isLoading}
-            onTrackClick={(track: Track) => handleTrackClick(track as any)}
+            onTrackClick={(track: Track) => handleTrackClick(convertTrackToYouTubeTrack(track))}
           />
           
           {/* Recently Played */}
           <RecentTracksShelf
             tracks={recentTracks.map(convertYouTubeTrackToTrack)}
             isLoading={isLoading}
-            onTrackClick={(track: Track) => handleTrackClick(track as any)}
+            onTrackClick={(track: Track) => handleTrackClick(convertTrackToYouTubeTrack(track))}
           />
         </TabsContent>
 
@@ -331,7 +356,11 @@ export function YouTubeMusicIntegration() {
             title="睡眠プレイリスト"
             items={sleepPlaylists.map(convertYouTubePlaylistToPlaylist)}
             type="playlists"
-            onItemClick={(item: Track | Playlist) => handlePlaylistClick(item as any)}
+            onItemClick={(item: Track | Playlist) => {
+              if ('track_count' in item) {
+                handlePlaylistClick(convertPlaylistToYouTubePlaylist(item as Playlist));
+              }
+            }}
             isLoading={isLoading}
             showPlayAll={true}
           />
@@ -400,7 +429,11 @@ export function YouTubeMusicIntegration() {
               title="検索結果"
               items={searchResults.map(convertYouTubeTrackToTrack)}
               type="tracks"
-              onItemClick={(item: Track | Playlist) => handleTrackClick(item as any)}
+              onItemClick={(item: Track | Playlist) => {
+                if ('sleep_score' in item) {
+                  handleTrackClick(convertTrackToYouTubeTrack(item as Track));
+                }
+              }}
               isLoading={isSearching}
             />
           )}
