@@ -40,10 +40,6 @@ dependencies = [
     "python-dotenv==1.1.1",
     "httpx==0.28.1",
     "python-multipart==0.0.20",
-    "cryptography>=41.0.0",
-    "google-auth-oauthlib>=1.0.0",
-    "google-api-python-client>=2.0.0",
-    "ytmusicapi>=1.0.0",
 ]
 
 [project.optional-dependencies]

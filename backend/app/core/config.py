@@ -31,13 +31,6 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     REDIS_URL: str | None = None
 
-    # YouTube Music Integration
-    GOOGLE_CLIENT_ID: str | None = None
-    GOOGLE_CLIENT_SECRET: str | None = None
-    ENCRYPTION_KEY: str | None = None
-    BASE_URL: str = "http://localhost:8000"
-    FRONTEND_URL: str = "http://localhost:3000"
-
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True
     )
