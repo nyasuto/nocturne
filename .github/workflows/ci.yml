@@ -72,7 +72,7 @@ jobs:
     
     - name: Run TypeScript check
       working-directory: ./frontend
-      run: npx tsc --noEmit || echo "TypeScript warnings present but not blocking"
+      run: npx tsc --noEmit
     
     - name: Run tests
       working-directory: ./frontend
