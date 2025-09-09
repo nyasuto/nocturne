@@ -21,6 +21,7 @@ from app.schemas.ai_music import CacheMetrics, GeneratedTrack
 @dataclass
 class CacheEntry:
     """キャッシュエントリ情報"""
+
     file_path: str
     metadata: dict[str, Any]
     created_at: datetime
@@ -68,7 +69,9 @@ class AudioCacheManager:
         normalized = json.dumps(generation_params, sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(normalized.encode()).hexdigest()[:16]
 
-    async def get_cached_track(self, generation_params: dict[str, Any]) -> GeneratedTrack | None:
+    async def get_cached_track(
+        self, generation_params: dict[str, Any]
+    ) -> GeneratedTrack | None:
         """
         キャッシュから音楽トラックを取得
 
@@ -109,11 +112,15 @@ class AudioCacheManager:
                 file_size=entry.file_size,
                 created_at=entry.created_at,
                 generation_method=track_metadata.get("generation_method", "cached"),
-                metadata=track_metadata
+                metadata=track_metadata,
             )
 
-    async def cache_track(self, track: GeneratedTrack, audio_data: bytes,
-                         generation_params: dict[str, Any]) -> str:
+    async def cache_track(
+        self,
+        track: GeneratedTrack,
+        audio_data: bytes,
+        generation_params: dict[str, Any],
+    ) -> str:
         """
         音楽トラックをキャッシュに保存
 
@@ -126,7 +133,9 @@ class AudioCacheManager:
             キャッシュキー
         """
         cache_key = self._generate_cache_key(generation_params)
-        file_extension = track.format.value if hasattr(track.format, 'value') else str(track.format)
+        file_extension = (
+            track.format.value if hasattr(track.format, "value") else str(track.format)
+        )
         cache_file_path = self.cache_dir / f"{cache_key}.{file_extension}"
 
         async with self._lock:
@@ -134,7 +143,7 @@ class AudioCacheManager:
             await self._ensure_cache_space(len(audio_data))
 
             # ファイルを保存
-            async with aiofiles.open(cache_file_path, 'wb') as f:
+            async with aiofiles.open(cache_file_path, "wb") as f:
                 await f.write(audio_data)
 
             # キャッシュエントリを追加
@@ -147,12 +156,12 @@ class AudioCacheManager:
                     "format": track.format,
                     "bitrate": track.bitrate,
                     "generation_method": track.generation_method,
-                    "generation_params": generation_params
+                    "generation_params": generation_params,
                 },
                 created_at=datetime.utcnow(),
                 last_accessed=datetime.utcnow(),
                 access_count=1,
-                file_size=len(audio_data)
+                file_size=len(audio_data),
             )
 
             self._cache_index[cache_key] = entry
@@ -191,7 +200,7 @@ class AudioCacheManager:
                 total_cache_size_mb=total_size / (1024 * 1024),
                 cache_hit_rate=hit_rate,
                 oldest_cache_entry=oldest,
-                newest_cache_entry=newest
+                newest_cache_entry=newest,
             )
 
     async def cleanup_expired_entries(self, max_age_days: int = 7) -> int:
@@ -209,7 +218,8 @@ class AudioCacheManager:
 
         async with self._lock:
             keys_to_remove = [
-                key for key, entry in self._cache_index.items()
+                key
+                for key, entry in self._cache_index.items()
                 if entry.last_accessed < cutoff_date
             ]
 
@@ -228,8 +238,7 @@ class AudioCacheManager:
 
         # LRU (Least Recently Used) でエントリを削除
         entries_by_access = sorted(
-            self._cache_index.items(),
-            key=lambda x: x[1].last_accessed
+            self._cache_index.items(), key=lambda x: x[1].last_accessed
         )
 
         for cache_key, entry in entries_by_access:
@@ -266,7 +275,7 @@ class AudioCacheManager:
             return
 
         try:
-            async with aiofiles.open(self.metadata_file, encoding='utf-8') as f:
+            async with aiofiles.open(self.metadata_file, encoding="utf-8") as f:
                 content = await f.read()
                 metadata = json.loads(content)
 
@@ -275,9 +284,11 @@ class AudioCacheManager:
                         file_path=entry_data["file_path"],
                         metadata=entry_data["metadata"],
                         created_at=datetime.fromisoformat(entry_data["created_at"]),
-                        last_accessed=datetime.fromisoformat(entry_data["last_accessed"]),
+                        last_accessed=datetime.fromisoformat(
+                            entry_data["last_accessed"]
+                        ),
                         access_count=entry_data["access_count"],
-                        file_size=entry_data["file_size"]
+                        file_size=entry_data["file_size"],
                     )
         except Exception as e:
             print(f"Error loading cache metadata: {e}")
@@ -293,11 +304,11 @@ class AudioCacheManager:
                 "created_at": entry.created_at.isoformat(),
                 "last_accessed": entry.last_accessed.isoformat(),
                 "access_count": entry.access_count,
-                "file_size": entry.file_size
+                "file_size": entry.file_size,
             }
 
         try:
-            async with aiofiles.open(self.metadata_file, 'w', encoding='utf-8') as f:
+            async with aiofiles.open(self.metadata_file, "w", encoding="utf-8") as f:
                 await f.write(json.dumps(metadata, ensure_ascii=False, indent=2))
         except Exception as e:
             print(f"Error saving cache metadata: {e}")

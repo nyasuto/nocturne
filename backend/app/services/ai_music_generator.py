@@ -34,8 +34,9 @@ class ProgrammaticMusicGenerator:
         self.sample_rate = 44100
         self.channels = 2  # ステレオ
 
-    def generate_sine_wave(self, frequency: float, duration: float,
-                          amplitude: float = 0.3) -> list[float]:
+    def generate_sine_wave(
+        self, frequency: float, duration: float, amplitude: float = 0.3
+    ) -> list[float]:
         """
         サイン波を生成
 
@@ -57,7 +58,9 @@ class ProgrammaticMusicGenerator:
 
         return samples
 
-    def generate_brown_noise(self, duration: float, amplitude: float = 0.1) -> list[float]:
+    def generate_brown_noise(
+        self, duration: float, amplitude: float = 0.1
+    ) -> list[float]:
         """
         ブラウンノイズを生成（低周波中心のホワイトノイズ）
 
@@ -79,7 +82,9 @@ class ProgrammaticMusicGenerator:
 
         return samples
 
-    def apply_fade(self, samples: list[float], fade_duration: float = 5.0) -> list[float]:
+    def apply_fade(
+        self, samples: list[float], fade_duration: float = 5.0
+    ) -> list[float]:
         """
         フェードイン・フェードアウトを適用
 
@@ -106,8 +111,9 @@ class ProgrammaticMusicGenerator:
 
         return result
 
-    def mix_tracks(self, track_list: list[list[float]],
-                  volumes: list[float] | None = None) -> list[float]:
+    def mix_tracks(
+        self, track_list: list[list[float]], volumes: list[float] | None = None
+    ) -> list[float]:
         """
         複数のトラックをミックス
 
@@ -152,7 +158,7 @@ class ProgrammaticMusicGenerator:
         """
         buffer = io.BytesIO()
 
-        with wave.open(buffer, 'wb') as wav_file:
+        with wave.open(buffer, "wb") as wav_file:
             wav_file.setnchannels(self.channels)
             wav_file.setsampwidth(2)  # 16-bit
             wav_file.setframerate(self.sample_rate)
@@ -166,7 +172,7 @@ class ProgrammaticMusicGenerator:
                 stereo_samples.extend([pcm_sample, pcm_sample])  # L, R
 
             # バイト配列に変換
-            wav_data = struct.pack('<' + 'h' * len(stereo_samples), *stereo_samples)
+            wav_data = struct.pack("<" + "h" * len(stereo_samples), *stereo_samples)
             wav_file.writeframes(wav_data)
 
         buffer.seek(0)
@@ -186,35 +192,37 @@ class AIMusicGenerator:
                 "base_frequencies": [40, 60, 80, 110],  # 低周波
                 "harmonics": [220, 440, 880],
                 "noise_mix": 0.3,
-                "tempo": 60  # BPM
+                "tempo": 60,  # BPM
             },
             MusicGenreEnum.AMBIENT: {
                 "base_frequencies": [55, 110, 220],
                 "harmonics": [330, 660, 1320],
                 "noise_mix": 0.2,
-                "tempo": 80
+                "tempo": 80,
             },
             MusicGenreEnum.WHITE_NOISE: {
                 "base_frequencies": [],
                 "harmonics": [],
                 "noise_mix": 1.0,
-                "tempo": 0
+                "tempo": 0,
             },
             MusicGenreEnum.NATURE_SOUNDS: {
                 "base_frequencies": [200, 400, 800],
                 "harmonics": [1600, 3200],
                 "noise_mix": 0.8,
-                "tempo": 0
+                "tempo": 0,
             },
             MusicGenreEnum.MEDITATION: {
                 "base_frequencies": [256, 432, 528],  # ヒーリング周波数
                 "harmonics": [864, 1728],
                 "noise_mix": 0.1,
-                "tempo": 40
-            }
+                "tempo": 40,
+            },
         }
 
-    async def generate_music(self, request: MusicGenerationRequest) -> MusicGenerationResponse:
+    async def generate_music(
+        self, request: MusicGenerationRequest
+    ) -> MusicGenerationResponse:
         """
         音楽を生成
 
@@ -232,41 +240,38 @@ class AIMusicGenerator:
                 "intensity": request.intensity.value,
                 "format": request.format.value,
                 "bitrate": request.bitrate,
-                "prompt": request.prompt
+                "prompt": request.prompt,
             }
 
             cached_track = await audio_cache.get_cached_track(generation_params)
             if cached_track:
-                return MusicGenerationResponse(
-                    success=True,
-                    track=cached_track
-                )
+                return MusicGenerationResponse(success=True, track=cached_track)
 
             # 新規生成
             track = await self._generate_programmatic_music(request)
 
-            return MusicGenerationResponse(
-                success=True,
-                track=track
-            )
+            return MusicGenerationResponse(success=True, track=track)
 
         except Exception as e:
             return MusicGenerationResponse(
-                success=False,
-                error_message=f"音楽生成エラー: {str(e)}"
+                success=False, error_message=f"音楽生成エラー: {str(e)}"
             )
 
-    async def _generate_programmatic_music(self, request: MusicGenerationRequest) -> GeneratedTrack:
+    async def _generate_programmatic_music(
+        self, request: MusicGenerationRequest
+    ) -> GeneratedTrack:
         """プログラマブル音楽生成"""
 
         # ジャンル設定を取得
-        config = self.genre_configs.get(request.genre, self.genre_configs[MusicGenreEnum.SLEEP])
+        config = self.genre_configs.get(
+            request.genre, self.genre_configs[MusicGenreEnum.SLEEP]
+        )
 
         # 強度に応じた調整
         intensity_multiplier = {
             IntensityEnum.LOW: 0.5,
             IntensityEnum.MEDIUM: 0.8,
-            IntensityEnum.HIGH: 1.0
+            IntensityEnum.HIGH: 1.0,
         }[request.intensity]
 
         # トラック生成
@@ -302,7 +307,9 @@ class AIMusicGenerator:
         mixed_samples = self.programmatic_generator.mix_tracks(tracks, volumes)
 
         # フェード適用
-        mixed_samples = self.programmatic_generator.apply_fade(mixed_samples, fade_duration=10.0)
+        mixed_samples = self.programmatic_generator.apply_fade(
+            mixed_samples, fade_duration=10.0
+        )
 
         # WAVファイルに変換
         audio_data = self.programmatic_generator.samples_to_wav(mixed_samples)
@@ -318,7 +325,7 @@ class AIMusicGenerator:
             bitrate=128,  # 仮の値
             file_size=len(audio_data),
             created_at=datetime.utcnow(),
-            generation_method="programmatic_synthesis"
+            generation_method="programmatic_synthesis",
         )
 
         # キャッシュに保存
@@ -328,7 +335,7 @@ class AIMusicGenerator:
             "intensity": request.intensity.value,
             "format": request.format.value,
             "bitrate": request.bitrate,
-            "prompt": request.prompt
+            "prompt": request.prompt,
         }
 
         cache_key = await audio_cache.cache_track(track, audio_data, generation_params)
@@ -355,7 +362,7 @@ class AIMusicGenerator:
                 return None
 
             # ファイルを読み込み
-            with open(entry.file_path, 'rb') as f:
+            with open(entry.file_path, "rb") as f:
                 return f.read()
 
         except Exception as e:

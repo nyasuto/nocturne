@@ -27,8 +27,7 @@ router = APIRouter(prefix="/api/v1/ai-music", tags=["AI音楽生成"])
 
 @router.post("/generate", response_model=MusicGenerationResponse)
 async def generate_music(
-    request: MusicGenerationRequest,
-    background_tasks: BackgroundTasks
+    request: MusicGenerationRequest, background_tasks: BackgroundTasks
 ) -> MusicGenerationResponse:
     """
     AI音楽を生成
@@ -42,7 +41,7 @@ async def generate_music(
     """
     try:
         # キャッシュマネージャーを初期化（初回のみ）
-        if not hasattr(audio_cache, '_initialized'):
+        if not hasattr(audio_cache, "_initialized"):
             await audio_cache.initialize()
             audio_cache._initialized = True
 
@@ -55,10 +54,7 @@ async def generate_music(
         return response
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"音楽生成に失敗しました: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"音楽生成に失敗しました: {str(e)}")
 
 
 @router.get("/tracks/{track_id}/audio")
@@ -77,8 +73,7 @@ async def get_track_audio(track_id: str) -> Response:
 
         if not audio_data:
             raise HTTPException(
-                status_code=404,
-                detail="指定されたトラックが見つかりません"
+                status_code=404, detail="指定されたトラックが見つかりません"
             )
 
         # ファイル形式を判定（現在はWAVのみ）
@@ -94,16 +89,15 @@ async def get_track_audio(track_id: str) -> Response:
             media_type=media_type,
             headers={
                 "Content-Disposition": f"attachment; filename=nocturne_track_{track_id}.{file_extension}",
-                "Cache-Control": "public, max-age=3600"  # 1時間キャッシュ
-            }
+                "Cache-Control": "public, max-age=3600",  # 1時間キャッシュ
+            },
         )
 
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"音声データの取得に失敗しました: {str(e)}"
+            status_code=500, detail=f"音声データの取得に失敗しました: {str(e)}"
         )
 
 
@@ -124,8 +118,7 @@ async def get_track_info(track_id: str) -> GeneratedTrack:
 
         if not entry:
             raise HTTPException(
-                status_code=404,
-                detail="指定されたトラックが見つかりません"
+                status_code=404, detail="指定されたトラックが見つかりません"
             )
 
         # GeneratedTrackオブジェクトを構築
@@ -141,7 +134,7 @@ async def get_track_info(track_id: str) -> GeneratedTrack:
             file_size=entry.file_size,
             created_at=entry.created_at,
             generation_method=metadata.get("generation_method", "cached"),
-            metadata=metadata
+            metadata=metadata,
         )
 
         return track
@@ -150,8 +143,7 @@ async def get_track_info(track_id: str) -> GeneratedTrack:
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"トラック情報の取得に失敗しました: {str(e)}"
+            status_code=500, detail=f"トラック情報の取得に失敗しました: {str(e)}"
         )
 
 
@@ -159,7 +151,7 @@ async def get_track_info(track_id: str) -> GeneratedTrack:
 async def get_track_library(
     page: int = Query(default=1, ge=1, description="ページ番号"),
     per_page: int = Query(default=20, ge=1, le=100, description="ページサイズ"),
-    genre: MusicGenreEnum | None = Query(None, description="ジャンルフィルタ")
+    genre: MusicGenreEnum | None = Query(None, description="ジャンルフィルタ"),
 ) -> TrackLibraryResponse:
     """
     生成済みトラックライブラリを取得
@@ -194,7 +186,7 @@ async def get_track_library(
                 file_size=entry.file_size,
                 created_at=entry.created_at,
                 generation_method=metadata.get("generation_method", "cached"),
-                metadata=metadata
+                metadata=metadata,
             )
 
             all_tracks.append(track)
@@ -211,13 +203,12 @@ async def get_track_library(
             tracks=page_tracks,
             total_count=len(all_tracks),
             page=page,
-            per_page=per_page
+            per_page=per_page,
         )
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"ライブラリの取得に失敗しました: {str(e)}"
+            status_code=500, detail=f"ライブラリの取得に失敗しました: {str(e)}"
         )
 
 
@@ -237,8 +228,7 @@ async def delete_track(track_id: str) -> dict:
 
         if not success:
             raise HTTPException(
-                status_code=404,
-                detail="指定されたトラックが見つかりません"
+                status_code=404, detail="指定されたトラックが見つかりません"
             )
 
         return {"message": f"トラック {track_id} を削除しました"}
@@ -247,8 +237,7 @@ async def delete_track(track_id: str) -> dict:
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"トラックの削除に失敗しました: {str(e)}"
+            status_code=500, detail=f"トラックの削除に失敗しました: {str(e)}"
         )
 
 
@@ -266,14 +255,13 @@ async def get_cache_metrics() -> CacheMetrics:
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"メトリクスの取得に失敗しました: {str(e)}"
+            status_code=500, detail=f"メトリクスの取得に失敗しました: {str(e)}"
         )
 
 
 @router.post("/cache/cleanup")
 async def cleanup_cache(
-    max_age_days: int = Query(default=7, ge=1, le=30, description="最大保持日数")
+    max_age_days: int = Query(default=7, ge=1, le=30, description="最大保持日数"),
 ) -> dict:
     """
     キャッシュをクリーンアップ
@@ -289,13 +277,12 @@ async def cleanup_cache(
 
         return {
             "message": f"{removed_count}件のキャッシュエントリを削除しました",
-            "removed_count": removed_count
+            "removed_count": removed_count,
         }
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"キャッシュクリーンアップに失敗しました: {str(e)}"
+            status_code=500, detail=f"キャッシュクリーンアップに失敗しました: {str(e)}"
         )
 
 
@@ -312,10 +299,7 @@ async def generate_playlist(_request: PlaylistGenerationRequest) -> GeneratedPla
         生成されたプレイリスト
     """
     # プレースホルダー実装
-    raise HTTPException(
-        status_code=501,
-        detail="プレイリスト生成機能は開発中です"
-    )
+    raise HTTPException(status_code=501, detail="プレイリスト生成機能は開発中です")
 
 
 # ヘルスチェック
@@ -336,12 +320,11 @@ async def health_check() -> dict:
             "service": "ai_music_generator",
             "cache_status": {
                 "total_tracks": metrics.total_cached_tracks,
-                "cache_size_mb": round(metrics.total_cache_size_mb, 2)
-            }
+                "cache_size_mb": round(metrics.total_cache_size_mb, 2),
+            },
         }
 
     except Exception as e:
         raise HTTPException(
-            status_code=503,
-            detail=f"サービスが利用できません: {str(e)}"
+            status_code=503, detail=f"サービスが利用できません: {str(e)}"
         )
