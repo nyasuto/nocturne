@@ -118,14 +118,38 @@ jobs:
       working-directory: ./backend
       run: uv run python init_db.py
     
-    - name: Start backend server
+    - name: Start backend server and wait for startup
       working-directory: ./backend
       run: |
-        uv run uvicorn app.main:app --port 8000 &
-        sleep 5
+        echo "Starting FastAPI server..."
+        uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level debug 2>&1 | tee uvicorn.log &
+        SERVER_PID=$!
+        echo "Server PID: $SERVER_PID"
+        
+        echo "Waiting for API to come up..."
+        for i in {1..30}; do
+          if curl -4s http://127.0.0.1:8000/ >/dev/null 2>&1; then
+            echo "✅ API is responding on attempt $i"
+            break
+          fi
+          if ! ps -p $SERVER_PID >/dev/null; then
+            echo "❌ Server process died - showing log:"
+            cat uvicorn.log
+            exit 1
+          fi
+          echo "Attempt $i: waiting for server..."
+          sleep 2
+        done
+        
+        # Final check
+        if ! curl -4s http://127.0.0.1:8000/ >/dev/null 2>&1; then
+          echo "❌ Server still not responding after 60 seconds"
+          cat uvicorn.log
+          exit 1
+        fi
     
     - name: Test API endpoints
       run: |
-        curl -f http://localhost:8000/ || exit 1
-        curl -f http://localhost:8000/api/v1/journeys/ || exit 1
+        curl -4 -f http://127.0.0.1:8000/ || exit 1
+        curl -4 -f http://127.0.0.1:8000/api/v1/journeys/ || exit 1
         echo "✅ API endpoints responding"
