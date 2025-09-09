@@ -1,0 +1,25 @@
+{
+  "40490bc3638ce62c": {
+    "file_path": "cache/audio/40490bc3638ce62c.wav",
+    "metadata": {
+      "title": "Sleep - Low",
+      "genre": "sleep",
+      "duration": 30,
+      "format": "wav",
+      "bitrate": 128,
+      "generation_method": "programmatic_synthesis",
+      "generation_params": {
+        "genre": "sleep",
+        "duration": 30,
+        "intensity": "low",
+        "format": "wav",
+        "bitrate": 128,
+        "prompt": null
+      }
+    },
+    "created_at": "2025-09-09T15:29:09.545643",
+    "last_accessed": "2025-09-09T15:34:34.378987",
+    "access_count": 2,
+    "file_size": 5292044
+  }
+}

@@ -88,7 +88,7 @@ const ShelfItem = ({
         </div>
         
         {/* Sleep Score Badge */}
-        {item.sleep_score && (
+        {'sleep_score' in item && item.sleep_score && (
           <div className="absolute top-2 right-2">
             <SleepScoreBadge score={item.sleep_score} size="sm" />
           </div>
@@ -102,7 +102,7 @@ const ShelfItem = ({
         </h3>
         
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span className="truncate mr-2">{item.artist}</span>
+          <span className="truncate mr-2">{'artist' in item ? item.artist : ''}</span>
           {isPlaylist && (
             <span className="flex items-center gap-1">
               <Music className="w-3 h-3" />
@@ -239,7 +239,6 @@ export function MusicLibraryShelf({
             <ShelfItem
               key={item.id}
               item={item}
-              type={type}
               onClick={onItemClick}
             />
           ))}
