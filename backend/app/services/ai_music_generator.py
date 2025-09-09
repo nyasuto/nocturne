@@ -38,12 +38,12 @@ class ProgrammaticMusicGenerator:
                           amplitude: float = 0.3) -> list[float]:
         """
         サイン波を生成
-        
+
         Args:
             frequency: 周波数（Hz）
             duration: 継続時間（秒）
             amplitude: 振幅（0.0-1.0）
-            
+
         Returns:
             サンプルデータのリスト
         """
@@ -60,11 +60,11 @@ class ProgrammaticMusicGenerator:
     def generate_brown_noise(self, duration: float, amplitude: float = 0.1) -> list[float]:
         """
         ブラウンノイズを生成（低周波中心のホワイトノイズ）
-        
+
         Args:
             duration: 継続時間（秒）
             amplitude: 振幅
-            
+
         Returns:
             サンプルデータのリスト
         """
@@ -82,11 +82,11 @@ class ProgrammaticMusicGenerator:
     def apply_fade(self, samples: list[float], fade_duration: float = 5.0) -> list[float]:
         """
         フェードイン・フェードアウトを適用
-        
+
         Args:
             samples: オーディオサンプル
             fade_duration: フェード時間（秒）
-            
+
         Returns:
             フェード処理済みサンプル
         """
@@ -110,11 +110,11 @@ class ProgrammaticMusicGenerator:
                   volumes: list[float] | None = None) -> list[float]:
         """
         複数のトラックをミックス
-        
+
         Args:
             track_list: トラックのリスト
             volumes: 各トラックの音量（0.0-1.0）
-            
+
         Returns:
             ミックスされたサンプル
         """
@@ -143,10 +143,10 @@ class ProgrammaticMusicGenerator:
     def samples_to_wav(self, samples: list[float]) -> bytes:
         """
         サンプルデータをWAVファイルに変換
-        
+
         Args:
             samples: サンプルデータ
-            
+
         Returns:
             WAVファイルのバイトデータ
         """
@@ -217,10 +217,10 @@ class AIMusicGenerator:
     async def generate_music(self, request: MusicGenerationRequest) -> MusicGenerationResponse:
         """
         音楽を生成
-        
+
         Args:
             request: 音楽生成リクエスト
-            
+
         Returns:
             生成結果
         """
@@ -341,10 +341,10 @@ class AIMusicGenerator:
     async def get_track_audio(self, track_id: str) -> bytes | None:
         """
         トラックの音声データを取得
-        
+
         Args:
             track_id: トラックID（キャッシュキー）
-            
+
         Returns:
             音声データ（バイト）
         """

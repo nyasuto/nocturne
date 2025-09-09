@@ -32,11 +32,11 @@ async def generate_music(
 ) -> MusicGenerationResponse:
     """
     AI音楽を生成
-    
+
     Args:
         request: 音楽生成リクエスト
         background_tasks: バックグラウンドタスク
-        
+
     Returns:
         生成結果
     """
@@ -65,10 +65,10 @@ async def generate_music(
 async def get_track_audio(track_id: str) -> Response:
     """
     生成された音楽トラックの音声データを取得
-    
+
     Args:
         track_id: トラックID（キャッシュキー）
-        
+
     Returns:
         音声ファイル
     """
@@ -111,10 +111,10 @@ async def get_track_audio(track_id: str) -> Response:
 async def get_track_info(track_id: str) -> GeneratedTrack:
     """
     トラック情報を取得
-    
+
     Args:
         track_id: トラックID
-        
+
     Returns:
         トラック情報
     """
@@ -163,12 +163,12 @@ async def get_track_library(
 ) -> TrackLibraryResponse:
     """
     生成済みトラックライブラリを取得
-    
+
     Args:
         page: ページ番号
         per_page: ページサイズ
         genre: ジャンルフィルタ
-        
+
     Returns:
         トラック一覧
     """
@@ -225,10 +225,10 @@ async def get_track_library(
 async def delete_track(track_id: str) -> dict:
     """
     トラックを削除
-    
+
     Args:
         track_id: トラックID
-        
+
     Returns:
         削除結果
     """
@@ -256,7 +256,7 @@ async def delete_track(track_id: str) -> dict:
 async def get_cache_metrics() -> CacheMetrics:
     """
     キャッシュメトリクスを取得
-    
+
     Returns:
         キャッシュ統計情報
     """
@@ -277,10 +277,10 @@ async def cleanup_cache(
 ) -> dict:
     """
     キャッシュをクリーンアップ
-    
+
     Args:
         max_age_days: 最大保持日数
-        
+
     Returns:
         クリーンアップ結果
     """
@@ -301,13 +301,13 @@ async def cleanup_cache(
 
 # プレイリスト生成（将来拡張）
 @router.post("/playlists/generate", response_model=GeneratedPlaylist)
-async def generate_playlist(request: PlaylistGenerationRequest) -> GeneratedPlaylist:
+async def generate_playlist(_request: PlaylistGenerationRequest) -> GeneratedPlaylist:
     """
     AIプレイリストを生成（将来実装）
-    
+
     Args:
-        request: プレイリスト生成リクエスト
-        
+        _request: プレイリスト生成リクエスト
+
     Returns:
         生成されたプレイリスト
     """
@@ -323,7 +323,7 @@ async def generate_playlist(request: PlaylistGenerationRequest) -> GeneratedPlay
 async def health_check() -> dict:
     """
     AI音楽生成サービスのヘルスチェック
-    
+
     Returns:
         サービス状態
     """

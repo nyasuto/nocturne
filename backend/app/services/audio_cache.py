@@ -35,7 +35,7 @@ class AudioCacheManager:
     def __init__(self, cache_dir: str | None = None, max_size_mb: int = 1024):
         """
         初期化
-        
+
         Args:
             cache_dir: キャッシュディレクトリパス（Noneの場合はデフォルト使用）
             max_size_mb: 最大キャッシュサイズ（MB）
@@ -57,10 +57,10 @@ class AudioCacheManager:
     def _generate_cache_key(self, generation_params: dict[str, Any]) -> str:
         """
         生成パラメータからキャッシュキーを生成
-        
+
         Args:
             generation_params: 音楽生成パラメータ
-            
+
         Returns:
             キャッシュキー（ハッシュ値）
         """
@@ -71,10 +71,10 @@ class AudioCacheManager:
     async def get_cached_track(self, generation_params: dict[str, Any]) -> GeneratedTrack | None:
         """
         キャッシュから音楽トラックを取得
-        
+
         Args:
             generation_params: 音楽生成パラメータ
-            
+
         Returns:
             キャッシュされたトラック（存在しない場合はNone）
         """
@@ -116,12 +116,12 @@ class AudioCacheManager:
                          generation_params: dict[str, Any]) -> str:
         """
         音楽トラックをキャッシュに保存
-        
+
         Args:
             track: 生成されたトラック情報
             audio_data: 音声データ（バイト）
             generation_params: 生成パラメータ
-            
+
         Returns:
             キャッシュキー
         """
@@ -163,10 +163,10 @@ class AudioCacheManager:
     async def remove_cached_track(self, cache_key: str) -> bool:
         """
         キャッシュからトラックを削除
-        
+
         Args:
             cache_key: キャッシュキー
-            
+
         Returns:
             削除成功フラグ
         """
@@ -197,10 +197,10 @@ class AudioCacheManager:
     async def cleanup_expired_entries(self, max_age_days: int = 7) -> int:
         """
         期限切れエントリをクリーンアップ
-        
+
         Args:
             max_age_days: 最大保持日数
-            
+
         Returns:
             削除したエントリ数
         """
