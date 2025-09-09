@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Play, Clock, Star, TrendingUp, Moon, Calendar, Pause } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Play, TrendingUp, Moon, Calendar, Pause } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SleepScoreBadge, SleepScoreBar } from './SleepScoreVisualization';
@@ -39,7 +39,7 @@ interface SleepMetrics {
 const mockTonightPlaylist: TonightPlaylist = {
   id: '1',
   title: '深い眠りのための夜想曲',
-  thumbnail_url: '/api/placeholder/120/120',
+  thumbnail_url: '/icon-192.png',
   track_count: 12,
   total_duration_minutes: 45,
   average_sleep_score: 87,
@@ -73,9 +73,65 @@ const contextChips = [
 export function TonightDashboard() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedChip, setSelectedChip] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [, setCurrentTrack] = useState<{ id: string; url: string } | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const handleStartSleep = () => {
-    setIsPlaying(!isPlaying);
+  const handleStartSleep = async () => {
+    if (isPlaying) {
+      // セッション終了
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      setIsPlaying(false);
+      setCurrentTrack(null);
+    } else {
+      // セッション開始 - AI音楽を生成して再生
+      try {
+        setIsLoading(true);
+        
+        // AI音楽生成APIを呼び出し
+        const generateResponse = await fetch('http://localhost:8000/api/v1/ai-music/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            genre: 'sleep',
+            duration: 1800, // 30分
+            intensity: 'low',
+            format: 'wav'
+          })
+        });
+        
+        if (!generateResponse.ok) {
+          throw new Error('音楽生成に失敗しました');
+        }
+        
+        const generateResult = await generateResponse.json();
+        const trackId = generateResult.track.id;
+        
+        // 音楽ファイルのURLを取得
+        const audioUrl = `http://localhost:8000/api/v1/ai-music/tracks/${trackId}/audio`;
+        
+        // Audio要素を作成して再生
+        if (audioRef.current) {
+          audioRef.current.src = audioUrl;
+          audioRef.current.loop = true; // ループ再生
+          await audioRef.current.play();
+          
+          setCurrentTrack({ id: trackId, url: audioUrl });
+          setIsPlaying(true);
+        }
+        
+      } catch (error) {
+        console.error('睡眠セッション開始エラー:', error);
+        alert('音楽の生成に失敗しました。しばらくしてからもう一度お試しください。');
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   const getMoodColor = () => {
@@ -90,6 +146,20 @@ export function TonightDashboard() {
     const m = Math.round((hours - h) * 60);
     return `${h}時間${m}分`;
   };
+
+  // Audio要素の初期化
+  useEffect(() => {
+    audioRef.current = new Audio();
+    audioRef.current.volume = 0.7;
+    
+    // クリーンアップ
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -115,15 +185,22 @@ export function TonightDashboard() {
             </div>
             <Button
               onClick={handleStartSleep}
+              disabled={isLoading}
               size="lg"
               className={cn(
                 'rounded-full px-8 py-3 font-semibold transition-all shadow-lg',
                 isPlaying
                   ? 'bg-nocturne-star/20 hover:bg-nocturne-star/30 text-white'
-                  : 'bg-white/90 hover:bg-white text-gray-900 sleep-glow'
+                  : 'bg-white/90 hover:bg-white text-gray-900 sleep-glow',
+                isLoading && 'opacity-50 cursor-not-allowed'
               )}
             >
-              {isPlaying ? (
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  音楽生成中...
+                </>
+              ) : isPlaying ? (
                 <>
                   <Pause className="w-5 h-5 mr-2" />
                   セッション終了
@@ -180,7 +257,7 @@ export function TonightDashboard() {
                 </div>
                 <div className="mt-2">
                   <SleepScoreBar
-                    scores={mockTonightPlaylist.tracks.map((track, i) => ({
+                    scores={mockTonightPlaylist.tracks.map((track) => ({
                       time: track.duration,
                       score: track.sleep_score,
                       title: track.title
