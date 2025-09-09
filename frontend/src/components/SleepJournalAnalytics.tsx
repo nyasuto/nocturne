@@ -488,7 +488,7 @@ export function SleepJournalAnalytics() {
                     {session.notes && (
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">メモ</p>
-                        <p className="text-sm text-muted-foreground italic">"{session.notes}"</p>
+                        <p className="text-sm text-muted-foreground italic">&ldquo;{session.notes}&rdquo;</p>
                       </div>
                     )}
                   </div>
