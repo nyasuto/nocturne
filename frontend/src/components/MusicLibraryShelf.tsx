@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Play, MoreHorizontal, Clock, Star, Music, Headphones } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { Play, MoreHorizontal, Clock, Music, Headphones } from 'lucide-react';
+// Removed unused Card components
 import { Button } from '@/components/ui/button';
 import { SleepScoreBadge } from './SleepScoreVisualization';
-import { cn } from '@/lib/utils';
+// Removed unused cn utility
 
 interface Track {
   id: string;
@@ -49,11 +49,9 @@ const formatDuration = (seconds: number): string => {
 
 const ShelfItem = ({ 
   item, 
-  type, 
   onClick 
 }: { 
   item: Track | Playlist; 
-  type: MusicShelfProps['type']; 
   onClick?: (item: Track | Playlist) => void;
 }) => {
   const isPlaylist = 'track_count' in item;

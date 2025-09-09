@@ -20,7 +20,6 @@ interface Track {
   thumbnail_url?: string;
   sleep_score: number;
   duration_seconds: number;
-  youtube_url: string;
 }
 
 interface PlaylistCreateData {
@@ -53,8 +52,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Nature Sounds',
     thumbnail_url: '/api/placeholder/120/120',
     sleep_score: 95,
-    duration_seconds: 10800,
-    youtube_url: 'https://youtube.com/watch?v=track1'
+    duration_seconds: 10800
   },
   {
     id: 'track2', 
@@ -62,8 +60,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Calm Music',
     thumbnail_url: '/api/placeholder/120/120',
     sleep_score: 88,
-    duration_seconds: 2400,
-    youtube_url: 'https://youtube.com/watch?v=track2'
+    duration_seconds: 2400
   },
   {
     id: 'track3',
@@ -71,8 +68,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Sleep Stories',
     thumbnail_url: '/api/placeholder/120/120', 
     sleep_score: 92,
-    duration_seconds: 1800,
-    youtube_url: 'https://youtube.com/watch?v=track3'
+    duration_seconds: 1800
   },
   {
     id: 'track4',
@@ -80,8 +76,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Natural Sounds',
     thumbnail_url: '/api/placeholder/120/120',
     sleep_score: 90,
-    duration_seconds: 3600,
-    youtube_url: 'https://youtube.com/watch?v=track4'
+    duration_seconds: 3600
   },
   {
     id: 'track5',
@@ -89,8 +84,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Meditation Music',
     thumbnail_url: '/api/placeholder/120/120',
     sleep_score: 85,
-    duration_seconds: 2700,
-    youtube_url: 'https://youtube.com/watch?v=track5'
+    duration_seconds: 2700
   }
 ];
 
