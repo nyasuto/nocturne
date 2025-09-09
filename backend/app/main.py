@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1 import audio, journeys
-from app.routers import ai_music
 from app.core.config import settings
 from app.db.database import init_db
+from app.routers import ai_music
 
 # FastAPIアプリケーションの作成
 app = FastAPI(
