@@ -10,13 +10,15 @@ import {
   Download,
   Upload,
   RotateCcw,
-  X 
+  X,
+  Youtube
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { useSettings } from '@/contexts/SettingsContext';
 import { exportSettings, importSettings } from '@/lib/settings';
+import { YouTubeMusicIntegration } from '@/components/YouTubeMusicIntegration';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -68,6 +70,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     { id: 'audio', label: '音響', icon: Volume2 },
     { id: 'timer', label: 'タイマー', icon: Clock },
     { id: 'theme', label: 'テーマ', icon: Palette },
+    { id: 'youtube', label: 'YouTube連携', icon: Youtube },
     { id: 'privacy', label: 'プライバシー', icon: Shield },
   ];
 
@@ -290,6 +293,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   </button>
                 </div>
               </div>
+            )}
+
+            {/* YouTube連携設定 */}
+            {activeTab === 'youtube' && (
+              <YouTubeMusicIntegration />
             )}
 
             {/* プライバシー設定 */}

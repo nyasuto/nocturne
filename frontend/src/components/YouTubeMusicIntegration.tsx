@@ -46,8 +46,15 @@ export function YouTubeMusicIntegration() {
 
   const handleConnect = async () => {
     try {
-      const authUrl = await youtubeMusicService.getAuthUrl();
-      window.location.href = authUrl;
+      const response = await youtubeMusicService.getAuthUrl();
+      
+      // Phase 1: プレースホルダーURL をチェック
+      if (response.includes('accounts.google.com/oauth2/auth') && !response.includes('client_id=')) {
+        setError('YouTube Music 連携はPhase 1では準備中です。\nPhase 2でフル機能が実装される予定です。');
+        return;
+      }
+      
+      window.location.href = response;
     } catch (error) {
       console.error('Failed to get auth URL:', error);
       setError('認証URLの取得に失敗しました');

@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from app.api.v1 import audio, journeys
 from app.core.config import settings
 from app.db.database import init_db
+from app.routers import youtube_music
 
 # FastAPIアプリケーションの作成
 app = FastAPI(
@@ -48,6 +49,9 @@ app.include_router(
 )
 
 app.include_router(audio.router, prefix=f"{settings.API_PREFIX}/audio", tags=["audio"])
+
+# YouTube Music API routes
+app.include_router(youtube_music.router)
 
 
 # エラーハンドラー
