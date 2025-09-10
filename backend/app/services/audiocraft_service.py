@@ -32,7 +32,9 @@ class AudioCraftMusicGenerator:
     def __init__(self):
         """初期化"""
         self.device = "mps" if torch.backends.mps.is_available() else "cpu"
-        self.model_name = "facebook/musicgen-small"  # 軽量モデルから開始
+        # 最高品質のlargeモデルを使用（3.3Bパラメータ）
+        # 選択可能: musicgen-small (300M), musicgen-medium (1.5B), musicgen-large (3.3B)
+        self.model_name = "facebook/musicgen-large"
         self.sample_rate = 32000  # MusicGenのデフォルトサンプル率
 
         # プロセッサーとモデルは遅延ロード
@@ -40,32 +42,32 @@ class AudioCraftMusicGenerator:
         self._model: MusicgenForConditionalGeneration | None = None
         self._model_loaded = False
 
-        # ジャンル別プロンプトテンプレート
+        # ジャンル別プロンプトテンプレート（睡眠・リラクゼーション最適化）
         self.genre_prompts = {
             MusicGenreEnum.SLEEP: {
-                IntensityEnum.LOW: "soft ambient pad, very slow, peaceful, 40Hz sine wave undertone",
-                IntensityEnum.MEDIUM: "gentle ambient music, calm pad, slow tempo, relaxing atmosphere",
-                IntensityEnum.HIGH: "warm ambient soundscape, flowing pads, meditative",
+                IntensityEnum.LOW: "ultra soft ambient sleep music, deep relaxation, 432Hz healing frequency, delta waves, binaural beats, floating pads, minimal movement, dream-like atmosphere, very slow evolving textures",
+                IntensityEnum.MEDIUM: "gentle sleep ambient music, soothing harmonic layers, theta waves, soft synthesizer pads, peaceful night atmosphere, slow breathing rhythm, celestial tones, sleep inducing frequencies",
+                IntensityEnum.HIGH: "warm ambient sleep soundscape, lush evolving pads, deep meditation state, alpha waves, ethereal textures, night sky atmosphere, healing tones, profound relaxation",
             },
             MusicGenreEnum.AMBIENT: {
-                IntensityEnum.LOW: "minimal ambient, ethereal pad, very spacious",
-                IntensityEnum.MEDIUM: "atmospheric ambient, gentle reverb, calm",
-                IntensityEnum.HIGH: "rich ambient texture, evolving pads, immersive",
+                IntensityEnum.LOW: "minimal ambient soundscape, infinite space, subtle drones, microsound textures, barely audible, zen atmosphere, stillness",
+                IntensityEnum.MEDIUM: "atmospheric ambient music, spatial reverb, calm floating pads, organic textures, peaceful journey, timeless",
+                IntensityEnum.HIGH: "rich cinematic ambient, evolving soundscapes, deep immersion, cosmic atmosphere, emotional depth, transcendent",
             },
             MusicGenreEnum.WHITE_NOISE: {
-                IntensityEnum.LOW: "soft static noise, gentle white noise background",
-                IntensityEnum.MEDIUM: "white noise, steady ambient background",
-                IntensityEnum.HIGH: "full spectrum white noise, consistent level",
+                IntensityEnum.LOW: "pink noise for sleep, soft filtered noise, gentle hiss, sleep therapy, consistent texture",
+                IntensityEnum.MEDIUM: "brown noise for deep sleep, warm filtered noise, comfortable blanket of sound, sleep aid",
+                IntensityEnum.HIGH: "sleep optimized white noise, full spectrum comfort, masking background sounds, deep sleep support",
             },
             MusicGenreEnum.NATURE_SOUNDS: {
-                IntensityEnum.LOW: "gentle rain, soft nature sounds, peaceful",
-                IntensityEnum.MEDIUM: "forest ambience, birds, gentle wind",
-                IntensityEnum.HIGH: "ocean waves, natural soundscape, flowing water",
+                IntensityEnum.LOW: "soft rain on leaves, distant thunder, cozy indoor atmosphere, sleep rain, gentle drizzle",
+                IntensityEnum.MEDIUM: "forest at night, crickets, owl calls, gentle breeze through trees, peaceful nature sleep sounds",
+                IntensityEnum.HIGH: "ocean waves for deep sleep, rhythmic tide, seashore at night, moonlit beach, hypnotic wave patterns",
             },
             MusicGenreEnum.MEDITATION: {
-                IntensityEnum.LOW: "meditation bell, very minimal, sacred space",
-                IntensityEnum.MEDIUM: "tibetan singing bowl, peaceful meditation",
-                IntensityEnum.HIGH: "rich meditation ambience, spiritual atmosphere",
+                IntensityEnum.LOW: "crystal singing bowls, 528Hz love frequency, minimal meditation, sacred silence, single tone focus",
+                IntensityEnum.MEDIUM: "tibetan bowls and chimes, chakra healing tones, peaceful temple atmosphere, mindfulness bells",
+                IntensityEnum.HIGH: "deep meditation journey, multiple singing bowls, harmonic overtones, transcendental atmosphere, spiritual awakening",
             },
         }
 
@@ -184,14 +186,16 @@ class AudioCraftMusicGenerator:
             # 音楽生成パラメータ
             max_new_tokens = int(self.sample_rate * duration / 32)  # 圧縮率考慮
 
-            # 生成実行
+            # 生成実行（高品質パラメータ）
             with torch.no_grad():
                 audio_values = self._model.generate(
                     **inputs,
-                    max_new_tokens=min(max_new_tokens, 1024),  # トークン数制限
+                    max_new_tokens=min(max_new_tokens, 2048),  # より長い生成を許可
                     do_sample=True,
-                    guidance_scale=3.0,
-                    temperature=1.0,
+                    guidance_scale=4.5,  # より強いプロンプト追従（3.0→4.5）
+                    temperature=0.8,  # より一貫性のある生成（1.0→0.8）
+                    top_k=250,  # 上位250トークンから選択
+                    top_p=0.95,  # 累積確率95%のトークンから選択
                 )
 
             # NumPy配列として取得
