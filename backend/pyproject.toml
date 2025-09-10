@@ -60,6 +60,14 @@ cache = [
     "celery>=5.4.0",
 ]
 
+audiocraft = [
+    "torch>=2.0.0",
+    "transformers>=4.31.0",
+    "encodec>=0.1.0",
+    "accelerate>=0.20.0",
+    "soundfile>=0.12.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/nyasuto/nocturne"
 Documentation = "https://github.com/nyasuto/nocturne/blob/main/POC_GUIDE.md"

@@ -108,6 +108,7 @@ jobs:
         uv python install 3.11
         uv venv .venv
         uv sync
+        uv sync --extra audiocraft
         uv pip install ruff mypy
     
     - name: Install frontend dependencies
