@@ -35,16 +35,18 @@ class AudioCraftMusicGenerator:
 
     def __init__(self) -> None:
         """初期化"""
-        # デバイス選択：現在はCPUで安定動作を優先
-        # TODO: MPS Meta tensorエラー解決後にMPS有効化
-        # if torch.backends.mps.is_available():
-        #     self.device = "mps"
-        # else:
-        self.device = "cpu"
+        # MPS GPU加速対応 (Apple Silicon)
+        if torch.backends.mps.is_available():
+            self.device = "mps"
+            logger.info("MPS (Apple Silicon GPU) acceleration enabled")
+        else:
+            self.device = "cpu"
+            logger.info("Falling back to CPU")
+
         logger.info(f"Using device: {self.device}")
-        # 動作確認のためsmallモデルを一時使用（300Mパラメータ）
+        # 高品質音楽生成のためmediumモデルを使用（1.5Bパラメータ）
         # 選択可能: musicgen-small (300M), musicgen-medium (1.5B), musicgen-large (3.3B)
-        self.model_name = "facebook/musicgen-small"
+        self.model_name = "facebook/musicgen-medium"
         self.sample_rate = 32000  # MusicGenのデフォルトサンプル率
 
         # プロセッサーとモデルは遅延ロード
@@ -89,16 +91,26 @@ class AudioCraftMusicGenerator:
         try:
             logger.info(f"Loading MusicGen model: {self.model_name}")
 
-            # CPUで実行する場合は別スレッドでロード
+            # MPS対応モデルロード
             def load_model() -> tuple[AutoProcessor, MusicgenForConditionalGeneration]:
                 processor = AutoProcessor.from_pretrained(self.model_name)
 
-                # CPU環境での標準ロード（安定性重視）
-                model = MusicgenForConditionalGeneration.from_pretrained(
-                    self.model_name,
-                    torch_dtype=torch.float32,
-                    low_cpu_mem_usage=False,  # メモリ豊富な環境では高速化
-                )
+                # MPS対応ロード（o3推奨設定）
+                if self.device == "mps":
+                    model = MusicgenForConditionalGeneration.from_pretrained(
+                        self.model_name,
+                        torch_dtype=torch.float16,  # FP16でメモリ削減
+                        low_cpu_mem_usage=False,  # Meta tensorを回避
+                        attn_implementation="eager",  # Flash-attention無効化
+                    )
+                else:
+                    # CPU環境での標準ロード
+                    model = MusicgenForConditionalGeneration.from_pretrained(
+                        self.model_name,
+                        torch_dtype=torch.float32,
+                        low_cpu_mem_usage=False,
+                    )
+
                 model = model.to(self.device)
                 model.eval()  # Set to evaluation mode
 
