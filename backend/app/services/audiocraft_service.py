@@ -100,8 +100,8 @@ class AudioCraftMusicGenerator:
                     model = MusicgenForConditionalGeneration.from_pretrained(
                         self.model_name,
                         torch_dtype=torch.float16,  # FP16でメモリ削減
-                        low_cpu_mem_usage=False,   # Meta tensorを回避
-                        attn_implementation="eager"  # Flash-attention無効化
+                        low_cpu_mem_usage=False,  # Meta tensorを回避
+                        attn_implementation="eager",  # Flash-attention無効化
                     )
                 else:
                     # CPU環境での標準ロード
