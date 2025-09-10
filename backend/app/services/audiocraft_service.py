@@ -11,6 +11,9 @@ import tempfile
 import uuid
 from datetime import datetime
 
+# Enable MPS fallback for Apple Silicon compatibility
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
 import soundfile as sf
 import torch
 from transformers import AutoProcessor, MusicgenForConditionalGeneration
@@ -29,7 +32,7 @@ logger = logging.getLogger(__name__)
 class AudioCraftMusicGenerator:
     """AudioCraft MusicGen音楽生成器"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """初期化"""
         self.device = "mps" if torch.backends.mps.is_available() else "cpu"
         # 最高品質のlargeモデルを使用（3.3Bパラメータ）
@@ -80,14 +83,17 @@ class AudioCraftMusicGenerator:
             logger.info(f"Loading MusicGen model: {self.model_name}")
 
             # CPUで実行する場合は別スレッドでロード
-            def load_model():
+            def load_model() -> tuple[AutoProcessor, MusicgenForConditionalGeneration]:
                 processor = AutoProcessor.from_pretrained(self.model_name)
                 model = MusicgenForConditionalGeneration.from_pretrained(
-                    self.model_name
+                    self.model_name,
+                    dtype=torch.float16 if self.device == "mps" else torch.float32,
+                    device_map=None,  # Disable auto device mapping
                 )
 
                 # デバイスに移動（MPSまたはCPU）
                 model = model.to(self.device)
+                model.eval()  # Set to evaluation mode
 
                 return processor, model
 
@@ -119,7 +125,7 @@ class AudioCraftMusicGenerator:
 
         return base_prompt
 
-    async def generate_music(self, request: MusicGenerationRequest) -> GeneratedTrack:
+    async def generate_music(self, request: MusicGenerationRequest) -> tuple[GeneratedTrack, bytes]:
         """
         音楽を生成
 
@@ -176,7 +182,7 @@ class AudioCraftMusicGenerator:
     async def _generate_audio(self, prompt: str, duration: int) -> bytes:
         """音声生成の実際の処理"""
 
-        def generate():
+        def generate() -> bytes:
             # プロンプトを処理
             inputs = self._processor(text=[prompt], padding=True, return_tensors="pt")
 
