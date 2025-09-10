@@ -24,7 +24,7 @@ from app.schemas.ai_music import (
     MusicGenreEnum,
 )
 from app.services.audio_cache import audio_cache
-from app.services.mubert_service import mubert_service
+from app.services.audiocraft_service import audiocraft_generator
 
 
 class ProgrammaticMusicGenerator:
@@ -186,7 +186,6 @@ class AIMusicGenerator:
     def __init__(self):
         """初期化"""
         self.programmatic_generator = ProgrammaticMusicGenerator()
-        self.mubert_service = mubert_service
 
         # ジャンル別生成パラメータ
         self.genre_configs = {
@@ -249,42 +248,20 @@ class AIMusicGenerator:
             if cached_track:
                 return MusicGenerationResponse(success=True, track=cached_track)
 
-            # 新規生成: Mubert API優先、プログラマブル生成をフォールバック
-            mubert_response = await self._try_mubert_generation(request)
-            if mubert_response.success:
-                return mubert_response
-
-            # Mubert失敗時はプログラマブル生成にフォールバック
-            print(
-                f"Mubert生成失敗、プログラマブル生成にフォールバック: {mubert_response.error_message}"
-            )
-            track = await self._generate_programmatic_music(request)
+            # 新規生成 - AudioCraftを優先、エラー時はプログラマブル生成にフォールバック
+            try:
+                track, audio_data = await self._generate_audiocraft_music(request)
+            except Exception as e:
+                print(
+                    f"AudioCraft generation failed, falling back to programmatic: {e}"
+                )
+                track, audio_data = await self._generate_programmatic_music(request)
 
             return MusicGenerationResponse(success=True, track=track)
 
         except Exception as e:
             return MusicGenerationResponse(
                 success=False, error_message=f"音楽生成エラー: {str(e)}"
-            )
-
-    async def _try_mubert_generation(
-        self, request: MusicGenerationRequest
-    ) -> MusicGenerationResponse:
-        """Mubert APIで音楽生成を試行"""
-        try:
-            # Mubert APIが利用可能かチェック
-            if not mubert_service._is_available():
-                return MusicGenerationResponse(
-                    success=False, error_message="Mubert APIキーが設定されていません"
-                )
-
-            # Mubert API呼び出し
-            async with mubert_service:
-                return await mubert_service.generate_sleep_track(request)
-
-        except Exception as e:
-            return MusicGenerationResponse(
-                success=False, error_message=f"Mubert API呼び出しエラー: {str(e)}"
             )
 
     async def _generate_programmatic_music(
@@ -373,7 +350,37 @@ class AIMusicGenerator:
         # ファイルURLを更新
         track.file_url = f"/api/v1/ai-music/tracks/{cache_key}/audio"
 
-        return track
+        return track, audio_data
+
+    async def _generate_audiocraft_music(
+        self, request: MusicGenerationRequest
+    ) -> tuple[GeneratedTrack, bytes]:
+        """AudioCraft音楽生成"""
+        try:
+            track, audio_data = await audiocraft_generator.generate_music(request)
+
+            # キャッシュに保存
+            generation_params = {
+                "genre": request.genre.value,
+                "duration": request.duration,
+                "intensity": request.intensity.value,
+                "format": request.format.value,
+                "bitrate": request.bitrate,
+                "prompt": request.prompt,
+            }
+
+            cache_key = await audio_cache.cache_track(
+                track, audio_data, generation_params
+            )
+
+            # ファイルURLを更新
+            track.file_url = f"/api/v1/ai-music/tracks/{cache_key}/audio"
+
+            return track, audio_data
+
+        except Exception as e:
+            print(f"AudioCraft generation error: {e}")
+            raise
 
     async def get_track_audio(self, track_id: str) -> bytes | None:
         """

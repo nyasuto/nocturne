@@ -21,7 +21,7 @@ from app.schemas.ai_music import (
 )
 from app.services.ai_music_generator import ai_music_generator
 from app.services.audio_cache import audio_cache
-from app.services.mubert_service import mubert_service
+from app.services.audiocraft_service import audiocraft_generator
 
 router = APIRouter(prefix="/api/v1/ai-music", tags=["AI音楽生成"])
 
@@ -316,8 +316,8 @@ async def health_check() -> dict:
         # キャッシュマネージャーの状態確認
         metrics = await audio_cache.get_cache_metrics()
 
-        # Mubert サービスの状態確認
-        mubert_health = await mubert_service.health_check()
+        # AudioCraftの状態確認
+        audiocraft_status = await audiocraft_generator.health_check()
 
         return {
             "status": "healthy",
@@ -326,8 +326,7 @@ async def health_check() -> dict:
                 "total_tracks": metrics.total_cached_tracks,
                 "cache_size_mb": round(metrics.total_cache_size_mb, 2),
             },
-            "mubert_status": mubert_health,
-            "fallback_available": True,  # プログラマブル生成が常に利用可能
+            "audiocraft_status": audiocraft_status,
         }
 
     except Exception as e:

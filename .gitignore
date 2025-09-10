@@ -92,6 +92,9 @@ coverage.xml
 /frontend/public/audio/*.m4a
 /backend/static/audio/
 
+# Audio cache (generated AI music)
+cache/
+
 # Auto-generated Next.js files
 /frontend/src/app/fonts/
 /frontend/src/app/favicon.ico
