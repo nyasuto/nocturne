@@ -7,7 +7,6 @@ AI音楽生成サービス
 3. Mubert API 統合（将来）
 """
 
-
 from app.schemas.ai_music import (
     GeneratedTrack,
     MusicGenerationRequest,
@@ -60,7 +59,6 @@ class AIMusicGenerator:
             return MusicGenerationResponse(
                 success=False, error_message=f"音楽生成エラー: {str(e)}"
             )
-
 
     async def _generate_audiocraft_music(
         self, request: MusicGenerationRequest

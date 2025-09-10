@@ -125,7 +125,9 @@ class AudioCraftMusicGenerator:
 
         return base_prompt
 
-    async def generate_music(self, request: MusicGenerationRequest) -> tuple[GeneratedTrack, bytes]:
+    async def generate_music(
+        self, request: MusicGenerationRequest
+    ) -> tuple[GeneratedTrack, bytes]:
         """
         音楽を生成
 
