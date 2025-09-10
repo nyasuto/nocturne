@@ -94,6 +94,7 @@ coverage.xml
 
 # Audio cache (generated AI music)
 cache/
+backend/cache/
 
 # Auto-generated Next.js files
 /frontend/src/app/fonts/
