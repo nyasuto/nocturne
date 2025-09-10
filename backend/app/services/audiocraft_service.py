@@ -14,6 +14,7 @@ from datetime import datetime
 # Enable MPS fallback for Apple Silicon compatibility
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
+import numpy as np
 import soundfile as sf
 import torch
 from transformers import AutoProcessor, MusicgenForConditionalGeneration
@@ -34,10 +35,16 @@ class AudioCraftMusicGenerator:
 
     def __init__(self) -> None:
         """初期化"""
-        self.device = "mps" if torch.backends.mps.is_available() else "cpu"
-        # 最高品質のlargeモデルを使用（3.3Bパラメータ）
+        # デバイス選択：現在はCPUで安定動作を優先
+        # TODO: MPS Meta tensorエラー解決後にMPS有効化
+        # if torch.backends.mps.is_available():
+        #     self.device = "mps"
+        # else:
+        self.device = "cpu"
+        logger.info(f"Using device: {self.device}")
+        # 動作確認のためsmallモデルを一時使用（300Mパラメータ）
         # 選択可能: musicgen-small (300M), musicgen-medium (1.5B), musicgen-large (3.3B)
-        self.model_name = "facebook/musicgen-large"
+        self.model_name = "facebook/musicgen-small"
         self.sample_rate = 32000  # MusicGenのデフォルトサンプル率
 
         # プロセッサーとモデルは遅延ロード
@@ -85,13 +92,13 @@ class AudioCraftMusicGenerator:
             # CPUで実行する場合は別スレッドでロード
             def load_model() -> tuple[AutoProcessor, MusicgenForConditionalGeneration]:
                 processor = AutoProcessor.from_pretrained(self.model_name)
+
+                # CPU環境での標準ロード（安定性重視）
                 model = MusicgenForConditionalGeneration.from_pretrained(
                     self.model_name,
-                    dtype=torch.float16 if self.device == "mps" else torch.float32,
-                    device_map=None,  # Disable auto device mapping
+                    torch_dtype=torch.float32,
+                    low_cpu_mem_usage=False,  # メモリ豊富な環境では高速化
                 )
-
-                # デバイスに移動（MPSまたはCPU）
                 model = model.to(self.device)
                 model.eval()  # Set to evaluation mode
 
@@ -154,6 +161,12 @@ class AudioCraftMusicGenerator:
 
             # トラック情報作成
             track_id = str(uuid.uuid4())
+            # 意味のあるファイル名を生成
+            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            readable_filename = (
+                f"nocturne_{request.genre.value}_{request.intensity.value}_{timestamp}"
+            )
+
             track = GeneratedTrack(
                 id=track_id,
                 title=f"{request.genre.value.title()} - {request.intensity.value.title()}",
@@ -169,6 +182,7 @@ class AudioCraftMusicGenerator:
                     "prompt": prompt,
                     "sample_rate": self.sample_rate,
                     "device": self.device,
+                    "filename": readable_filename,
                 },
             )
 
@@ -209,9 +223,39 @@ class AudioCraftMusicGenerator:
             # NumPy配列として取得
             audio_array = audio_values[0].cpu().numpy()
 
+            # 音声配列の検証とクリーニング
+            if len(audio_array.shape) > 1:
+                # 複数チャンネルの場合は最初のチャンネルのみ使用
+                audio_array = audio_array[0]
+
+            # NaNや無限値をクリーンアップ
+            audio_array = audio_array[~(np.isnan(audio_array) | np.isinf(audio_array))]
+
+            # 正規化 (-1.0 to 1.0)
+            if len(audio_array) > 0:
+                max_val = max(abs(audio_array.max()), abs(audio_array.min()))
+                if max_val > 0:
+                    audio_array = audio_array / max_val
+
             # WAVファイルとして保存
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_file:
-                sf.write(tmp_file.name, audio_array, self.sample_rate, format="WAV")
+                try:
+                    # librosaを使った保存（より安定）
+                    import librosa
+
+                    librosa.output.write_wav(
+                        tmp_file.name, audio_array, self.sample_rate
+                    )
+                except ImportError:
+                    # librosaがない場合はsoundfile使用
+                    sf.write(
+                        tmp_file.name,
+                        audio_array.astype(np.float32),
+                        self.sample_rate,
+                        subtype="PCM_16",
+                        format="WAV",
+                    )
+
                 tmp_file.flush()
 
                 # ファイルを読み込んでバイトデータとして返す
